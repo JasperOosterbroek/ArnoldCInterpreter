@@ -27,12 +27,12 @@ TokenDict = {
                     '=': "(YOU SET US UP)",
                     '*': "(YOU'RE FIRED)"
                 },
-    'SEPERATOR': {';': "(ENOUGH TALK)"},
+    'SEPERATOR': {'ENDOFDECLERATION': "(ENOUGH TALK)"},
     'SOF': {'start': "(IT'S SHOWTIME)"},
     'EOF': {'end': "(YOU HAVE BEEN TERMINATED)"},
     'IDENTIFIER': {'DECLERATION': "(HEY CHRISTMAS TREE)",
                    'DEFINITION': "(GET TO THE CHOPPER)"},
-    # for literals it's not so interresting what the 'value' is rather then
+    # for literals it's not so interesting what the 'value' is rather then
     # that it is a literal and what the actual value is
     'LITERAL': {'INT ASSIGNED': "(HERE IS MY INVITATION)"},
     'IO': {'PRINT': "TALK TO THE HAND"}

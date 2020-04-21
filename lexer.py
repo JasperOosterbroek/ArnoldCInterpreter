@@ -4,72 +4,85 @@ import re
 import copy
 from token import TokenDict, Token
 
-
-def tokenRegex(fileLine, regexDict : dict):
-    regex = regexDict.popitem()
-    if re.match(regex[1], fileLine) is not None:
-        return regex[0]
-    else:
-        if len(regexDict) == 0:
-            return None
-        return tokenRegex(fileLine, regexDict)
-
-def getTokenType(fileLine, tokenDictCopy):
-    if len(tokenDictCopy) == 0:
+def listNoneCheck(checkList, count = 0):
+    if count == len(checkList):
         return None
-    curTokenTuple = tokenDictCopy.popitem()
-    curTokenTupleDictCopy = copy.deepcopy(curTokenTuple[1])
-    tokenr = tokenRegex(fileLine, curTokenTupleDictCopy)
-    if tokenr is not None:
-        return tokenr
-
+    if checkList[count] == None:
+        return listNoneCheck(checkList, count+1)
     else:
-        return getTokenType(fileLine, tokenDictCopy)
+        return checkList[count]
+
+def tokenRegex(fileLine, regexDict, count = 0):
+    if count == len(regexDict):
+        return None
+    if re.match(regexDict[1], fileLine) is not None:
+        return regexDict[0]
+    return tokenRegex(fileLine, regexDict, count + 1)
+
+def getTokenType(fileLine, tokenDict, count = 0):
+    if count == len(tokenDict):
+        return None
+    tokenr = listNoneCheck(list(map(lambda x: tokenRegex(fileLine, x), tokenDict[1].items())))
+    if tokenr is not None:
+        return Token(tokenDict[0], tokenr)
+    else:
+        return getTokenType(fileLine, tokenDict, count + 1)
+
+def getArgument(types : list, string):
+    if len(types) == 0:
+        return None # should raise an error
+    curType = types.pop(0)
+    if curType == "string":
+        if re.match('^[a-zA-Z]*$', string) is not None:
+            return string
+    elif curType == "int":
+        if re.match('^[0-9]*$', string) is not None:
+            return string
+
+    return getArgument(types, string)
 
 def readLine(file, line = 0):
     fileLine = file.readline()
-    tokenDictCopy = copy.deepcopy(TokenDict)
-    token = getTokenType(fileLine, tokenDictCopy)
-    # print(token, fileLine)
-    #
-    #
-    # todo
-    # voor dingen waarna een waarde of variable kan zijn check dit
-    # aanmaken van de token
-    #
+    tokenList = list(map(lambda x: getTokenType(fileLine, x), TokenDict.items()))
+    token = listNoneCheck(tokenList)
+    tokenlist = []
     if token is None:
         raise SyntaxError
-    elif token in TokenDict['OPERATOR'].keys():
-        print('operator')
-    elif token in TokenDict['SEPERATOR'].keys():
-        print('seperator')
-    elif token in TokenDict['SOF'].keys():
-        # start of script so end this current function
-        print('start of function')
-    elif token in TokenDict['EOF'].keys():
-        print('end of function')
-        return []
-    elif token in TokenDict['IDENTIFIER'].keys():
-        print("identifier")
-    elif token in TokenDict['IO'].keys():
-        print('IO')
-
-    # return a list of tokens for the parser to handle
-    # recursive so insert the result of this one to the left of the list
-    # return value from the if statements above pushed to the front of the list
-    return readLine(file, line+1)
+    elif token.value in TokenDict['EOF'].keys():
+        return [token] # last return statement, the break of this recursion
+    elif token.value in TokenDict['OPERATOR'].keys():
+        # operator follows an identifier can be int or string not both
+        argument = getArgument(['int', 'string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
+        if argument is not None:
+            tokenlist.append(Token('LITERAL', argument))
+        else:
+            raise SyntaxError
+    elif token.value in TokenDict['IDENTIFIER'].keys():
+        # Identifier is followed by a string
+        argument = getArgument(['string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
+        if argument is not None:
+            tokenlist.append(Token('IDENTIFIER', argument))
+        else:
+            raise SyntaxError
+    elif token.value in TokenDict['IO'].keys():
+        # io is followed by a string
+        argument = getArgument(['string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
+        if argument is not None:
+            tokenlist.append(Token('IDENTIFIER', argument))
+        else:
+            raise SyntaxError
+    elif token.value in TokenDict['LITERAL'].keys():
+        argument = getArgument(['int'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
+        if argument is not None:
+            tokenlist.append(Token('IDENTIFIER', argument))
+        else:
+            raise SyntaxError
+    tokenlist.insert(0, token)
+    return tokenlist + readLine(file, line+1)
 
 def lex(filename : str):
     f = open(filename, "r")
-    readLine(f)
-    #line
-    #pos
-    #get token?
-
+    print(readLine(f))
 
 if __name__ == '__main__':
     lex("testcode.arnoldc")
-
-
-
-
