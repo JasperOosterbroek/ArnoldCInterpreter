@@ -20,6 +20,7 @@ from typing import Any
 
 
 # literal is floatingin the aether :[
+# keyword for if while, etc https://en.wikipedia.org/wiki/Lexical_analysis
 TokenDict = {
     'OPERATOR': {
                     '-': "(GET DOWN)",
@@ -27,11 +28,11 @@ TokenDict = {
                     '=': "(YOU SET US UP)",
                     '*': "(YOU'RE FIRED)"
                 },
-    'SEPERATOR': {'ENDOFDECLERATION': "(ENOUGH TALK)"},
+    'SEPERATOR': {  'STARTASSIGNVARIABLE': "(GET TO THE CHOPPER)",
+                    'ENDASSIGNVARIABLE': "(ENOUGH TALK)"},
     'SOF': {'start': "(IT'S SHOWTIME)"},
     'EOF': {'end': "(YOU HAVE BEEN TERMINATED)"},
-    'IDENTIFIER': {'DECLERATION': "(HEY CHRISTMAS TREE)",
-                   'DEFINITION': "(GET TO THE CHOPPER)"},
+    'IDENTIFIER': {'DECLERATION': "(HEY CHRISTMAS TREE)"},
     # for literals it's not so interesting what the 'value' is rather then
     # that it is a literal and what the actual value is
     'LITERAL': {'INT ASSIGNED': "(HERE IS MY INVITATION)"},
