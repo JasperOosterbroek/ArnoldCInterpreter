@@ -28,7 +28,7 @@ TokenDict = {
                     '=': "(YOU SET US UP)",
                     '*': "(YOU'RE FIRED)"
                 },
-    'SEPERATOR': {  'STARTASSIGNVARIABLE': "(GET TO THE CHOPPER)",
+    'SEPERATOR': {'STARTASSIGNVARIABLE': "(GET TO THE CHOPPER)",
                     'ENDASSIGNVARIABLE': "(ENOUGH TALK)"},
     'SOF': {'start': "(IT'S SHOWTIME)"},
     'EOF': {'end': "(YOU HAVE BEEN TERMINATED)"},
@@ -39,7 +39,9 @@ TokenDict = {
     'IO': {'PRINT': "TALK TO THE HAND"}
 }
 
-class Token:
+
+# name Ltoken to not conflict while debugging using pycharm, token is an stl class name
+class LToken:
 
     def __init__(self, tType : str, tValue : Any) -> None:
         """

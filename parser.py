@@ -7,10 +7,8 @@
 # 4. return de boom voor de interperter
 
 from node import Node
-import token
 import lexer
-import functools
-import ast
+import functools as ft
 # https://en.wikipedia.org/wiki/Order_of_operations
 RuleDict = {
     'SOF':[
@@ -19,7 +17,7 @@ RuleDict = {
     ],
 
     'IDENTIFIER': [
-        ['OPERATOR']
+        ['=']
     ],
 
     'OPERATOR': [
@@ -28,20 +26,14 @@ RuleDict = {
         ['IDENTIFIER'],
         ['IDENTIFIER', 'OPERATOR']
     ],
-    'SEPERATOR': [
-        ['IDENTIFIER', 'OPERATOR', 'SEPERATOR']
+    'STARTASSIGNVARIABLE': [
+        ['IDENTIFIER', 'ENDASSIGNVARIABLE']
     ],
-    'IO':[
+    'IO': [
         ['IDENTIFIER']
     ]
 
 }
-precedence = [
-    ['*'],
-    ['-', '+'],
-    ['=']
-]
-
 # check of in rule dict, zoja, controleer alle lijsten, als ding in lijst zit controleer lijsten etc.
 # return longest list function ?
 def longestListInList(list, count = 0):
@@ -57,26 +49,39 @@ def longestListInList(list, count = 0):
             return list[count]
     return None
 
-def checkRules(tokenList, rulelist, pos, count = 0):
-    if tokenList[pos+count].type == rulelist[count]:
-        if tokenList[pos+count].type in RuleDict:
-            test = list(map(lambda x: checkRules(tokenList, x, pos + count + 1), RuleDict[tokenList[pos+count].type]))
-            if longestListInList(test) is not None:
-                return [tokenList[pos+count]] + longestListInList(test)
-            else:
-                return [tokenList[pos+count]]
+# def checkRules(tokenList, ruleList, pos, count = 0):
+#
+#
+#
+#     return None # hier errort hij!
 
-        else:
-            if count == len(rulelist) - 1:
-                return [tokenList[pos+count]]
-            else:
-                return [tokenList[pos+count]] + checkRules(tokenList, rulelist, pos, count + 1)
-    elif tokenList[pos+count].type in RuleDict:
-        # special exception
-        if tokenList[pos+count].value == 'ENDASSIGNVARIABLE':
-            return [tokenList[pos+count]]
-        return []
-    return None
+# def checkRules(tokenList, rulelist, pos, count = 0):
+#     if(len(rulelist) == 0):
+#         return []
+#     if tokenList[pos+count].type == rulelist[count] or tokenList[pos+count].value == rulelist[count]:
+#         if tokenList[pos+count].type in RuleDict or tokenList[pos+count].value in RuleDict:
+#             nextList = list(map(lambda x: checkRules(tokenList, x, pos + count + 1), RuleDict[tokenList[pos+count].type]))
+#             longestInNextList = longestListInList(nextList)
+#             if longestInNextList is not None:
+#                 if count is not len(rulelist) -1:
+#                     next = checkRules(tokenList, rulelist, pos + len(longestInNextList), count + 1)
+#                     if next is None:
+#                         return None
+#                     return [tokenList[pos + count]] + longestListInList(nextList) + next
+#                 return [tokenList[pos+count]] + longestListInList(nextList)
+#             return None
+#
+#         else:
+#             if count == len(rulelist) - 1:
+#                 return [tokenList[pos+count]]
+#             else:
+#                 next = checkRules(tokenList, rulelist, pos, count + 1)
+#                 if next is None:
+#                     return None
+#                 return [tokenList[pos+count]] + next
+#     elif tokenList[pos+count].type in RuleDict or tokenList[pos+count].value in RuleDict:
+#         return []
+#     return None # error?
 
 
 def parse(tokenList, count = 0):
@@ -93,13 +98,17 @@ def parse(tokenList, count = 0):
         else:
             return 'error, no SOF'
     else:
-        if tokenList[count].type in RuleDict:
-            possibleRules = RuleDict[tokenList[count].type]
-            # print(tokenList[count].type, possibleRules)
-            test = list(map(lambda x: checkRules(tokenList, x, count+1), possibleRules))
+        if tokenList[count].type in RuleDict or tokenList[count].value in RuleDict:
+            possibleRules = []
+            if tokenList[count].type in RuleDict:
+                possibleRules = possibleRules + RuleDict[tokenList[count].type]
+            if tokenList[count].value in RuleDict:
+                possibleRules = possibleRules + RuleDict[tokenList[count].value]
 
-            test[0].insert(0, tokenList[count])
+            print(possibleRules)
+            test = list(map(lambda x: checkRules(tokenList, x, count+1), possibleRules))
             print(test)
+            test[0].insert(0, tokenList[count])
             return test + parse(tokenList, count + len(test[0]))
     # print(tokenList, count)
 
@@ -108,4 +117,5 @@ def parseList(tokenList):
 
 if __name__ == '__main__':
     output = lexer.lex("testcode.arnoldc")
+    print(output)
     print(parseList(output))

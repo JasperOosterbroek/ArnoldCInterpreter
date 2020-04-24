@@ -2,7 +2,7 @@
 import typing
 import re
 import copy
-from token import TokenDict, Token
+from Ltoken import TokenDict, LToken
 
 def listNoneCheck(checkList, count = 0):
     if count == len(checkList):
@@ -24,7 +24,7 @@ def getTokenType(fileLine, tokenDict, count = 0):
         return None
     tokenr = listNoneCheck(list(map(lambda x: tokenRegex(fileLine, x), tokenDict[1].items())))
     if tokenr is not None:
-        return Token(tokenDict[0], tokenr)
+        return LToken(tokenDict[0], tokenr)
     else:
         return getTokenType(fileLine, tokenDict, count + 1)
 
@@ -55,9 +55,9 @@ def readLine(file, line = 0):
         argumentValue, argumentType = getArgument(['int', 'string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
         if argumentValue is not None:
             if argumentType == 'int':
-                tokenlist.append(Token('LITERAL', argumentValue.rstrip()))
+                tokenlist.append(LToken('LITERAL', argumentValue.rstrip()))
             elif argumentType == 'string':
-                tokenlist.append(Token('IDENTIFIER', argumentValue.rstrip()))
+                tokenlist.append(LToken('VARIABLE', argumentValue.rstrip()))
         else:
             raise SyntaxError
     elif token.value in TokenDict['IDENTIFIER'].keys():
@@ -70,7 +70,7 @@ def readLine(file, line = 0):
         # io is followed by a string
         argumentValue, argumentType = getArgument(['string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
         if argumentValue is not None:
-            tokenlist.append(Token('IDENTIFIER', argumentValue.rstrip()))
+            tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip()))
         else:
             raise SyntaxError
     elif token.value in TokenDict['LITERAL'].keys():
@@ -84,8 +84,8 @@ def readLine(file, line = 0):
         if token.value == "STARTASSIGNVARIABLE":
             argumentValue, argumentType = getArgument(['string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
             if argumentValue is not None:
-                tokenlist.append(Token('IDENTIFIER', argumentValue.rstrip()))
-                tokenlist.append(Token('OPERATOR', '='))
+                tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip()))
+                tokenlist.append(LToken('OPERATOR', '='))
             else:
                 raise SyntaxError
 
