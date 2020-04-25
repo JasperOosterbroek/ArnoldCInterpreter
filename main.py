@@ -8,6 +8,7 @@
 # de gang
 # lexer
 # parser
+# run
 
 import lexer as lexer
 

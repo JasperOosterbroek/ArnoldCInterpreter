@@ -26,16 +26,25 @@ TokenDict = {
                     '-': "(GET DOWN)",
                     '+': "(GET UP)",
                     '=': "(YOU SET US UP)",
-                    '*': "(YOU'RE FIRED)"
+                    '*': "(YOU'RE FIRED)",
+                    '||': "(CONSIDER THAT A DIVORCE)",
+                    '&&': "(KNOCK KNOCK)",
+                    '>': "(LET OFF SOME STEAM BENNET)"
                 },
     'SEPERATOR': {'STARTASSIGNVARIABLE': "(GET TO THE CHOPPER)",
                     'ENDASSIGNVARIABLE': "(ENOUGH TALK)"},
+    'LOOP':{
+        'STARTWHILE': "(STICK AROUND)",
+        'ENDWHILE' : "(CHILL)"
+    },
     'SOF': {'start': "(IT'S SHOWTIME)"},
     'EOF': {'end': "(YOU HAVE BEEN TERMINATED)"},
     'IDENTIFIER': {'DECLERATION': "(HEY CHRISTMAS TREE)"},
     # for literals it's not so interesting what the 'value' is rather then
     # that it is a literal and what the actual value is
-    'LITERAL': {'INT ASSIGNED': "(HERE IS MY INVITATION)"},
+    'LITERAL': {'SETVALUE': "(HERE IS MY INVITATION)",
+                'FALSE': "@NO PROBLEMO",
+                'TRUE': "@I LIED"},
     'IO': {'PRINT': "TALK TO THE HAND"}
 }
 
@@ -60,5 +69,5 @@ class LToken:
         return "Token( Type: {}, Value: {})".format(self.type, self.value)
 
     def __str__(self) -> str:
-        return "{}, {}".format(self.type, self.value)
+        return "Token: {}, {}".format(self.type, self.value)
 

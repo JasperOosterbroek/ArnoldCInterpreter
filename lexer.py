@@ -28,18 +28,22 @@ def getTokenType(fileLine, tokenDict, count = 0):
     else:
         return getTokenType(fileLine, tokenDict, count + 1)
 
-def getArgument(types : list, string):
-    if len(types) == 0:
-        return None # should raise an error
-    curType = types.pop(0)
-    if curType == "string":
-        if re.match('^[a-zA-Z]*$', string) is not None:
-            return string, curType
-    elif curType == "int":
+def getArgument(types : list, string, count = 0):
+    if len(types) == count:
+        # last check incase of marcos
+        if re.match('(@NO PROBLEMO)', string):
+            return 1, 'int'
+        elif re.match('(@I LIED)', string):
+            return 0, 'int'
+        return None
+    if types[count] == "string":
+        if re.match('^[a-zA-Z][\\w]*$', string) is not None:
+            return string, types[count]
+    elif types[count] == "int":
         if re.match('^[0-9]*$', string) is not None:
-            return string, curType
+            return string, types[count]
 
-    return getArgument(types, string)
+    return getArgument(types, string, count+1)
 
 def readLine(file, line = 0):
     fileLine = file.readline()
@@ -47,7 +51,8 @@ def readLine(file, line = 0):
     token = listNoneCheck(tokenList)
     tokenlist = []
     if token is None:
-        raise SyntaxError
+        print(fileLine)
+        raise SyntaxError (fileLine)
     elif token.value in TokenDict['EOF'].keys():
         return [token] # last return statement, the break of this recursion
     elif token.value in TokenDict['OPERATOR'].keys():
@@ -68,13 +73,13 @@ def readLine(file, line = 0):
             raise SyntaxError
     elif token.value in TokenDict['IO'].keys():
         # io is followed by a string
-        argumentValue, argumentType = getArgument(['string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
+        argumentValue, argumentType = getArgument(['string', 'int'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
         if argumentValue is not None:
-            tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip()))
+            tokenlist.append(LToken('VARIABLE', argumentValue.rstrip()))
         else:
             raise SyntaxError
     elif token.value in TokenDict['LITERAL'].keys():
-        argumentValue, argumentType = getArgument(['int'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
+        argumentValue, argumentType = getArgument(['int', 'string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
         if argumentValue is not None:
             token.value = argumentValue.rstrip()
         else:
