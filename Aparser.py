@@ -28,8 +28,9 @@ RuleDict = {
     'STARTASSIGNVARIABLE': [
         ['IDENTIFIER', 'ENDASSIGNVARIABLE']
     ],
-    'LOOP': [
-        ['IDENTIFIER', 'IO', 'SEPERATOR']
+    'STARTBLOCK': [
+        ['VARIABLE'],
+        ['LITERAL']
     ],
     'IO': [
         ['LITERAL'],
@@ -79,20 +80,25 @@ def checkRules(tokenList, rulelist, pos, count = 0):
     return None
 
 
-def createTree(nodeList, count = 0):
+def createTree(nodeList, count = 0, isreversed = False):
     if nodeList[count].type == 'SEPERATOR':
         count = count + 1
     if count >= len(nodeList) -1 or nodeList[count+1].type == 'SEPERATOR':
         return nodeList[count].value
     if nodeList[count].type == "OPERATOR":
         if nodeList[count].value == '=':
-            return Node(nodeList[count].value, None, createTree(list(reversed(nodeList[count+1:]))))
+            return Node(nodeList[count].value, None, createTree(list(reversed(nodeList[count+1:])), 0, True))
         else:
-            return Node(nodeList[count].value, None, createTree(nodeList, count+1))
+            newtree = createTree(nodeList, count + 1, isreversed)
+            if isreversed:
+                return Node(nodeList[count].value, newtree)
+            return Node(nodeList[count].value, None, newtree)
     if nodeList[count].type == "IO":
-        return Node(nodeList[count].value, createTree(nodeList, count + 1))
-
-    operatorNode = createTree(nodeList, count + 1)
+        return Node(nodeList[count].value, createTree(nodeList, count + 1, isreversed))
+    operatorNode = createTree(nodeList, count + 1, isreversed)
+    if isreversed: #only if last
+        operatorNode.right = nodeList[count].value
+        return operatorNode
     operatorNode.left = nodeList[count].value
     return operatorNode
 
@@ -109,27 +115,27 @@ def parse(tokenList, count=0):
             return parse(tokenList, count+1)
         else:
             return 'error, no SOF'
+    elif tokenList[count].type is "ENDBLOCK":
+        return []
     else:
-        if tokenList[count].type is "LOOP":
-            print("paniek ", tokenList[count])
-            # hoi jasper van morgen, hier misschien iets met die loops doen ofzo
 
         if tokenList[count].type is not 'OPERATOR':
-            print("tokenlist: ",tokenList[count])
             if tokenList[count].type in RuleDict or tokenList[count].value in RuleDict:
                 possibleRules = []
                 if tokenList[count].type in RuleDict:
                     possibleRules = possibleRules + RuleDict[tokenList[count].type]
                 if tokenList[count].value in RuleDict:
                     possibleRules = possibleRules + RuleDict[tokenList[count].value]
-                test = longestListInList(list(map(lambda x: checkRules(tokenList, x, count+1), possibleRules)))
-                if test is not None:
-                    test.insert(0, tokenList[count])
-                    return [createTree(test)] + parse(tokenList, count + len(test))
-    return []
 
-if __name__ == '__main__':
-    output = lexer.lex("testcode.arnoldc")
-    pList = parse(output)
-    for i in pList:
-        print(i)
+                if tokenList[count].type is "STARTBLOCK":
+                    if tokenList[count].value == "STARTWHILE":
+                        nodeValue = "while"
+                    lhs = createTree(longestListInList(list(map(lambda x: checkRules(tokenList, x, count + 1), possibleRules))))
+                    rhs = parse(tokenList, count + 2)
+                    return [Node(nodeValue, lhs, rhs)]
+                else:
+                    test = longestListInList(list(map(lambda x: checkRules(tokenList, x, count+1), possibleRules)))
+                    if test is not None:
+                        test.insert(0, tokenList[count])
+                        return [createTree(test)] + parse(tokenList, count + len(test))
+    return []

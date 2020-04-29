@@ -27,15 +27,17 @@ TokenDict = {
                     '+': "(GET UP)",
                     '=': "(YOU SET US UP)",
                     '*': "(YOU'RE FIRED)",
-                    '||': "(CONSIDER THAT A DIVORCE)",
-                    '&&': "(KNOCK KNOCK)",
-                    '>': "(LET OFF SOME STEAM BENNET)"
+                    '/': "(HE HAD TO SPLIT)",
+                    '>': "(LET OFF SOME STEAM BENNET)",
+                    '%': "(I LET HIM GO)"
                 },
     'SEPERATOR': {'STARTASSIGNVARIABLE': "(GET TO THE CHOPPER)",
                     'ENDASSIGNVARIABLE': "(ENOUGH TALK)"},
-    'LOOP':{
-        'STARTWHILE': "(STICK AROUND)",
-        'ENDWHILE' : "(CHILL)"
+    'STARTBLOCK': {
+        'STARTWHILE': "(STICK AROUND)"
+    },
+    'ENDBLOCK':{
+        'ENDWHILE': "(CHILL)"
     },
     'SOF': {'start': "(IT'S SHOWTIME)"},
     'EOF': {'end': "(YOU HAVE BEEN TERMINATED)"},

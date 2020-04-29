@@ -3,6 +3,7 @@ import typing
 import re
 import copy
 from Ltoken import TokenDict, LToken
+import errorClass as ec
 
 def listNoneCheck(checkList, count = 0):
     if count == len(checkList):
@@ -30,76 +31,81 @@ def getTokenType(fileLine, tokenDict, count = 0):
 
 def getArgument(types : list, string, count = 0):
     if len(types) == count:
-        # last check incase of marcos
-        if re.match('(@NO PROBLEMO)', string):
-            return 1, 'int'
-        elif re.match('(@I LIED)', string):
-            return 0, 'int'
-        return None
-    if types[count] == "string":
+        if re.match(r'^(@NO PROBLEMO)', string):
+            return '1', 'int'
+        elif re.match(r'^(@I LIED)', string):
+            return '0', 'int'
+        return None, None
+    if types[count] == "variable":
         if re.match('^[a-zA-Z][\\w]*$', string) is not None:
             return string, types[count]
     elif types[count] == "int":
-        if re.match('^[0-9]*$', string) is not None:
+        if re.match('^-?[0-9]*$', string) is not None:
             return string, types[count]
+    elif types[count] == 'string':
+        if re.match(r'^".*"', string) is not None:
+            return string[1:-2], types[count]  # remove " from string
 
     return getArgument(types, string, count+1)
 
+expectedArguments = {
+    'OPERATOR': ['int', 'variable'],
+    'IO': ['variable', 'int', 'string'],
+    'LITERAL': ['int', 'variable'],
+    'STARTBLOCK': ['int', 'variable'],
+    'IDENTIFIER': ['variable']
+
+}
+
 def readLine(file, line = 0):
     fileLine = file.readline()
-    tokenList = list(map(lambda x: getTokenType(fileLine, x), TokenDict.items()))
-    token = listNoneCheck(tokenList)
+    line += 1
+    tokenTypeList = list(map(lambda x: getTokenType(fileLine, x), TokenDict.items()))
+    token = listNoneCheck(tokenTypeList)
     tokenlist = []
+    errorList = []
     if token is None:
-        print(fileLine)
-        raise SyntaxError (fileLine)
+        errorList.append(ec.Error('Syntax Error', "Invalid syntax {} on line {}".format(fileLine, line)))
     elif token.value in TokenDict['EOF'].keys():
-        return [token] # last return statement, the break of this recursion
-    elif token.value in TokenDict['OPERATOR'].keys():
-        # operator follows an identifier can be int or string not both
-        argumentValue, argumentType = getArgument(['int', 'string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
-        if argumentValue is not None:
-            if argumentType == 'int':
-                tokenlist.append(LToken('LITERAL', argumentValue.rstrip()))
-            elif argumentType == 'string':
-                tokenlist.append(LToken('VARIABLE', argumentValue.rstrip()))
+        return ([token], []) # last return statement, the break of this recursion
+    elif token.value in TokenDict[token.type].keys() and token.type in expectedArguments:
+        substring = re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip().rstrip()
+        if len(substring) > 0:
+            argumentValue, argumentType = getArgument(expectedArguments[token.type], substring)
+            if argumentValue is not None:
+                if token.value == 'DECLERATION' or token.type == 'LITERAL':
+                    token.value = argumentValue
+                elif token.value == 'STARTASSIGNVARIABLE':
+                    tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip()))
+                    tokenlist.append(LToken('OPERATOR', '='))
+                else:
+                    if argumentType == 'int':
+                        tokenlist.append(LToken('LITERAL', argumentValue.rstrip()))
+                    elif argumentType == 'variable':
+                        tokenlist.append(LToken('VARIABLE', argumentValue.rstrip()))
+                    elif argumentType == 'string':
+                        tokenlist.append(LToken('LITERALSTRING', argumentValue.rstrip()))
+            else:
+                errorList.append(ec.Error('Syntax Error', "Invalid argument \"{}\" on line {}".format(substring, line)))
         else:
-            raise SyntaxError
-    elif token.value in TokenDict['IDENTIFIER'].keys():
-        argumentValue, argumentType = getArgument(['string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
-        if argumentValue is not None:
-            token.value = argumentValue.rstrip()
-        else:
-            raise SyntaxError
-    elif token.value in TokenDict['IO'].keys():
-        # io is followed by a string
-        argumentValue, argumentType = getArgument(['string', 'int'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
-        if argumentValue is not None:
-            tokenlist.append(LToken('VARIABLE', argumentValue.rstrip()))
-        else:
-            raise SyntaxError
-    elif token.value in TokenDict['LITERAL'].keys():
-        argumentValue, argumentType = getArgument(['int', 'string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
-        if argumentValue is not None:
-            token.value = argumentValue.rstrip()
-        else:
-            raise SyntaxError
-
+            errorList.append(ec.Error('Syntax Error', "missing argument after \"{}\" on line {}".format(fileLine, line)))
     elif token.value in TokenDict['SEPERATOR'].keys():
         if token.value == "STARTASSIGNVARIABLE":
-            argumentValue, argumentType = getArgument(['string'], re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip())
-            if argumentValue is not None:
-                tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip()))
-                tokenlist.append(LToken('OPERATOR', '='))
+            substring = re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip().rstrip()
+            if len(substring) > 0:
+                argumentValue, argumentType = getArgument(['variable'], substring)
+                if argumentValue is not None:
+                    tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip()))
+                    tokenlist.append(LToken('OPERATOR', '='))
+                else:
+                    errorList.append(ec.Error('Syntax Error', "Invalid argument \"{}\" on line {}".format(substring, line)))
             else:
-                raise SyntaxError
+                errorList.append(ec.Error('Syntax Error', "missing argument after \"{}\" on line {}".format(fileLine, line)))
 
     tokenlist.insert(0, token)
-    return tokenlist + readLine(file, line+1)
+    next = readLine(file, line)
+    return tokenlist + next[0], errorList + next[1]
 
 def lex(filename : str):
     f = open(filename, "r")
     return readLine(f)
-
-if __name__ == '__main__':
-    lex("testcode.arnoldc")
