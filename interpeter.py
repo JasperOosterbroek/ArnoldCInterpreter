@@ -61,8 +61,6 @@ def executeStep(curNode, progState):
 
     lhs = curNode.left if curNode.left not in progStateCopy.variables else progStateCopy.variables[curNode.left]
     rhs = curNode.right if curNode.right not in progStateCopy.variables else progStateCopy.variables[curNode.right]
-    # operatord misschien in dict gooien met een functie eraanvast
-    # dan if in dict, en dan dict val opzoeken en die functie pakken, kan de code veel kleiner maken
     if curNode.data in operatorDict:
         if type(rhs) == node.Node and type (lhs) == node.Node:
             return operatorDict[curNode.data](executeStep(lhs,progStateCopy), executeStep(rhs, progStateCopy))
@@ -73,13 +71,10 @@ def executeStep(curNode, progState):
         return operatorDict[curNode.data](int(lhs), int(rhs))
     if curNode.data == '=':
         if type(rhs) == node.Node:
-            test = executeStep(rhs, progStateCopy)
-            progStateCopy.variables[curNode.left] = test
+            progStateCopy.variables[curNode.left] = executeStep(rhs, progStateCopy)
             return progStateCopy
         if rhs is not None:
             progStateCopy.variables[curNode.left] = rhs
-            return progStateCopy
-        else:
             return progStateCopy
     if curNode.data == 'PRINT':
         print(lhs)  # JASPER FOR THE LOVE OF GOD DEZE PRINT NIET VERWIJDEREN!!!!!!!!!
@@ -88,13 +83,12 @@ def executeStep(curNode, progState):
 def run(filename):
     output = lexer.lex(filename)
     if len(output[1]) > 0:
-        print(output[1])
-        map(lambda x: print(x), output[1])
+            print(output[1])
     else:
-        print(output[0])
         pList = prs.parse(output[0])
-        print(pList)
-        progstate = programstate()
-        for p in pList:
-            progstate = executeStep(p, progstate)
-            print(progstate)
+        if len(pList[1]) > 0:
+            print(pList[1])
+        else:
+            progstate = programstate()
+            for p in pList[0]:
+                progstate = executeStep(p, progstate)

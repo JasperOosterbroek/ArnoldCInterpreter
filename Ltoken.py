@@ -54,14 +54,16 @@ TokenDict = {
 # name Ltoken to not conflict while debugging using pycharm, token is an stl class name
 class LToken:
 
-    def __init__(self, tType : str, tValue : Any) -> None:
+    def __init__(self, tType : str, tValue : Any, line : int) -> None:
         """
         Token constructor, constructs token.
         :param tType: Type of token, must be in enum TokenEnum,
         :param tValue: Value of the token, can be any type
+        :param line: Line the token originated from, used for error logging
         """
         self.type = tType
         self.value = tValue
+        self.line = line
 
     def __repr__(self) -> str:
         """

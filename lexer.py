@@ -20,14 +20,14 @@ def tokenRegex(fileLine, regexDict, count = 0):
         return regexDict[0]
     return tokenRegex(fileLine, regexDict, count + 1)
 
-def getTokenType(fileLine, tokenDict, count = 0):
+def getTokenType(fileLine, tokenDict, lineNum, count = 0):
     if count == len(tokenDict):
         return None
     tokenr = listNoneCheck(list(map(lambda x: tokenRegex(fileLine, x), tokenDict[1].items())))
     if tokenr is not None:
-        return LToken(tokenDict[0], tokenr)
+        return LToken(tokenDict[0], tokenr, lineNum)
     else:
-        return getTokenType(fileLine, tokenDict, count + 1)
+        return getTokenType(fileLine, tokenDict, lineNum, count + 1)
 
 def getArgument(types : list, string, count = 0):
     if len(types) == count:
@@ -60,7 +60,7 @@ expectedArguments = {
 def readLine(file, line = 0):
     fileLine = file.readline()
     line += 1
-    tokenTypeList = list(map(lambda x: getTokenType(fileLine, x), TokenDict.items()))
+    tokenTypeList = list(map(lambda x: getTokenType(fileLine, x, line), TokenDict.items()))
     token = listNoneCheck(tokenTypeList)
     tokenlist = []
     errorList = []
@@ -76,15 +76,15 @@ def readLine(file, line = 0):
                 if token.value == 'DECLERATION' or token.type == 'LITERAL':
                     token.value = argumentValue
                 elif token.value == 'STARTASSIGNVARIABLE':
-                    tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip()))
-                    tokenlist.append(LToken('OPERATOR', '='))
+                    tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip(), line))
+                    tokenlist.append(LToken('OPERATOR', '=', line))
                 else:
                     if argumentType == 'int':
-                        tokenlist.append(LToken('LITERAL', argumentValue.rstrip()))
+                        tokenlist.append(LToken('LITERAL', argumentValue.rstrip(), line))
                     elif argumentType == 'variable':
-                        tokenlist.append(LToken('VARIABLE', argumentValue.rstrip()))
+                        tokenlist.append(LToken('VARIABLE', argumentValue.rstrip(), line))
                     elif argumentType == 'string':
-                        tokenlist.append(LToken('LITERALSTRING', argumentValue.rstrip()))
+                        tokenlist.append(LToken('LITERALSTRING', argumentValue.rstrip(), line))
             else:
                 errorList.append(ec.Error('Syntax Error', "Invalid argument \"{}\" on line {}".format(substring, line)))
         else:
@@ -95,8 +95,8 @@ def readLine(file, line = 0):
             if len(substring) > 0:
                 argumentValue, argumentType = getArgument(['variable'], substring)
                 if argumentValue is not None:
-                    tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip()))
-                    tokenlist.append(LToken('OPERATOR', '='))
+                    tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip(), line))
+                    tokenlist.append(LToken('OPERATOR', '=', line))
                 else:
                     errorList.append(ec.Error('Syntax Error', "Invalid argument \"{}\" on line {}".format(substring, line)))
             else:
@@ -105,6 +105,8 @@ def readLine(file, line = 0):
     tokenlist.insert(0, token)
     next = readLine(file, line)
     return tokenlist + next[0], errorList + next[1]
+
+
 
 def lex(filename : str):
     f = open(filename, "r")
