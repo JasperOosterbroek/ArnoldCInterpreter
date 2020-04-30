@@ -1,26 +1,4 @@
-from enum import Enum
 from typing import Any
-
-# class TokenEnum(Enum):
-#
-#     OPERATOR =
-#     EOF = {}
-#     SOF = {}
-#
-#
-#     def __new__(cls, index, content):
-#         member = object.__new__(cls)
-#         member.index = index
-#         member.content = content
-#         return member
-#
-#     def __int__(self):
-#         return self.value
-#
-
-
-# literal is floatingin the aether :[
-# keyword for if while, etc https://en.wikipedia.org/wiki/Lexical_analysis
 TokenDict = {
     'OPERATOR': {
                     '-': "(GET DOWN)",
@@ -51,7 +29,6 @@ TokenDict = {
 }
 
 
-# name Ltoken to not conflict while debugging using pycharm, token is an stl class name
 class LToken:
 
     def __init__(self, tType : str, tValue : Any, line : int) -> None:

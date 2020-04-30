@@ -1,3 +1,5 @@
+import copy
+
 from node import Node
 import errorClass as er
 RuleDict = {
@@ -7,6 +9,9 @@ RuleDict = {
     ],
 
     'IDENTIFIER': [ #block
+        ['=']
+    ],
+    'DECLERATION':[
         ['=']
     ],
     'OPERATOR': [
@@ -24,7 +29,8 @@ RuleDict = {
     ],
     'IO': [
         ['LITERAL'],
-        ['VARIABLE']
+        ['VARIABLE'],
+        ['LITERALSTRING']
     ]
 
 }
@@ -44,17 +50,23 @@ def longestListInList(list, count = 0):
 
 # check of hier de regels kloppen
 
-def checkRules(tokenList, rulelist, pos, count = 0):
+def checkRules(tokenList, rulelist, varlist, pos, count = 0):
     errorList = []
     if(len(rulelist) == 0):
         return [], errorList
+    if tokenList[pos+count].type == 'IDENTIFIER' and tokenList[pos+count].value not in varlist:
+        errorList.append(er.Error('Parse error', "Undeclared variable {} on line {}".format(tokenList[pos+count].value, tokenList[pos+count].line)))
+        return [], errorList
+    if tokenList[pos+count].type == 'VARIABLE' and tokenList[pos+count] not in varlist:
+        errorList.append(er.Error('Parse error',"Undefined variable {} on line {}".format(tokenList[pos + count].value, tokenList[pos + count].line)))
+        return [], errorList
     if tokenList[pos+count].type == rulelist[count] or tokenList[pos+count].value == rulelist[count]:
         if tokenList[pos+count].type in RuleDict or tokenList[pos+count].value in RuleDict:
-            nextList = list(map(lambda x: checkRules(tokenList, x, pos + count + 1), RuleDict[tokenList[pos+count].type]))
+            nextList = list(map(lambda x: checkRules(tokenList, x, varlist, pos + count + 1), RuleDict[tokenList[pos+count].type]))
             longestInNextList = longestListInList(nextList)
             if len(longestInNextList[0]) > 0:
                 if count is not len(rulelist) - 1:
-                    next = checkRules(tokenList, rulelist, pos + len(longestInNextList[0]), count + 1)
+                    next = checkRules(tokenList, rulelist, varlist, pos + len(longestInNextList[0]), count + 1)
                     if next[0] is None:
                         errorList.append(er.Error('Parse error', "Expected '{}', got '{}' on line {}".format(rulelist[count+1],tokenList[pos].value, tokenList[pos].line)))
                         return [], errorList
@@ -68,7 +80,7 @@ def checkRules(tokenList, rulelist, pos, count = 0):
             if count == len(rulelist) - 1:
                 return [tokenList[pos+count]], errorList
             else:
-                next = checkRules(tokenList, rulelist, pos, count + 1)
+                next = checkRules(tokenList, rulelist, varlist, pos, count + 1)
                 if len(next[0]) is 0:
                     errorList.append(er.Error('Parse error', "Expected '{}', got '{}' on line {}".format(rulelist[count+1], tokenList[pos].value, tokenList[pos].line)))
                     return [], errorList
@@ -100,8 +112,9 @@ def createTree(nodeList, count = 0, isreversed = False):
     operatorNode.left = nodeList[count].value
     return operatorNode
 
-def parse(tokenList, count=0):
+def parse(tokenList, varlist = [], count=0):
     errorList = []
+    tmpVarlist = copy.deepcopy(varlist)
     if count == len(tokenList) - 1:
         if tokenList[count].type == 'EOF':
             return [], errorList # error list append eof not found
@@ -111,7 +124,7 @@ def parse(tokenList, count=0):
     # First line is always a SOF
     if count == 0:
         if tokenList[count].type == 'SOF':
-            nextParse = parse(tokenList, count+1)
+            nextParse = parse(tokenList,tmpVarlist, count+1)
             return nextParse[0], errorList + nextParse[1]
         else:
             return [], errorList
@@ -119,6 +132,11 @@ def parse(tokenList, count=0):
         return [], errorList
     else:
         if tokenList[count].type is not 'OPERATOR':
+            if tokenList[count].type == 'DECLERATION':
+                if tokenList[count].value not in tmpVarlist:
+                    tmpVarlist.append(tokenList[count].value)
+                else:
+                    errorList.append(er.Error('Parse error', 'Multiple declerations of {} on line {}'.format(tokenList[count].value, tokenList[count].line)))
             if tokenList[count].type in RuleDict or tokenList[count].value in RuleDict:
                 possibleRules = []
                 if tokenList[count].type in RuleDict:
@@ -130,17 +148,17 @@ def parse(tokenList, count=0):
                     nodeValue = None
                     if tokenList[count].value == "STARTWHILE":
                         nodeValue = "while"
-                    lhs = createTree(longestListInList(list(map(lambda x: checkRules(tokenList, x, count + 1), possibleRules))))
-                    rhs = parse(tokenList, count + 2)
+                    lhs = createTree(longestListInList(list(map(lambda x: checkRules(tokenList, x,tmpVarlist, count + 1), possibleRules))))
+                    rhs = parse(tokenList, tmpVarlist, count + 2)
                     return [Node(nodeValue, lhs, rhs)], errorList
                 else:
-                    curParseMap = list(map(lambda x: checkRules(tokenList, x, count+1), possibleRules))
+                    curParseMap = list(map(lambda x: checkRules(tokenList, x, tmpVarlist, count+1), possibleRules))
                     curparse = longestListInList(curParseMap)
                     if len(curparse[1]) > 0:
                         return [], errorList + curparse[1]
                     if len(curparse[0]) is not 0:
                         curparse[0].insert(0, tokenList[count])
-                        nextparse = parse(tokenList, count + len(curparse[0]))
+                        nextparse = parse(tokenList, tmpVarlist, count + len(curparse[0]))
                         return [createTree(curparse[0])] + nextparse[0], errorList + nextparse[1]
     errorList.append(er.Error('Parse error', "Unexpected {} on line: {}".format(tokenList[count].value, tokenList[count].line)))
     return [], errorList

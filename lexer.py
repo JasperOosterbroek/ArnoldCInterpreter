@@ -44,7 +44,7 @@ def getArgument(types : list, string, count = 0):
             return string, types[count]
     elif types[count] == 'string':
         if re.match(r'^".*"', string) is not None:
-            return string[1:-2], types[count]  # remove " from string
+            return string[1:-1], types[count]  # remove " from string
 
     return getArgument(types, string, count+1)
 
@@ -74,6 +74,8 @@ def readLine(file, line = 0):
             argumentValue, argumentType = getArgument(expectedArguments[token.type], substring)
             if argumentValue is not None:
                 if token.value == 'DECLERATION' or token.type == 'LITERAL':
+                    if token.value == 'DECLERATION':
+                        token.type = 'DECLERATION'
                     token.value = argumentValue
                 elif token.value == 'STARTASSIGNVARIABLE':
                     tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip(), line))

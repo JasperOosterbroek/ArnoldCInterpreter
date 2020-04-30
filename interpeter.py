@@ -3,6 +3,7 @@ import lexer
 import node
 import copy
 import functools
+import errorClass as er
 
 def add_command(x, y):
     return x + y
@@ -24,9 +25,10 @@ def mod_command(x,y):
 
 class programstate:
 
-    def __init__(self, variables=None, methods=None, stepCount=0):
+    def __init__(self, variables=None, methods=None, error=None, stepCount=0):
         self.variables = variables if variables else dict()
         self.methods = methods if methods else dict()
+        self.errors = error if error else list()
         self.stepCount = stepCount
 
     def __str__(self):
@@ -34,8 +36,9 @@ class programstate:
 
     def __repr__(self):
         return str(self)
+
     def __deepcopy__(self, memodict={}):
-        return programstate(self.variables, self.methods, self.stepCount)
+        return programstate(self.variables, self.methods,self.errors, self.stepCount)
 
 operatorDict = {
     '-': min_command,
@@ -58,7 +61,6 @@ def executeStep(curNode, progState):
             return executeStep(curNode, progStateCopy)
         else:
             return progStateCopy
-
     lhs = curNode.left if curNode.left not in progStateCopy.variables else progStateCopy.variables[curNode.left]
     rhs = curNode.right if curNode.right not in progStateCopy.variables else progStateCopy.variables[curNode.right]
     if curNode.data in operatorDict:
@@ -82,13 +84,20 @@ def executeStep(curNode, progState):
 
 def run(filename):
     output = lexer.lex(filename)
+    print(output)
     if len(output[1]) > 0:
             print(output[1])
     else:
         pList = prs.parse(output[0])
+        print(pList)
         if len(pList[1]) > 0:
             print(pList[1])
         else:
             progstate = programstate()
+            print(pList[0])
             for p in pList[0]:
-                progstate = executeStep(p, progstate)
+                print(progstate)
+                if len(progstate.errors) > 0:
+                    print(progstate)
+                else:
+                    progstate = executeStep(p, progstate)
