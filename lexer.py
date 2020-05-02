@@ -1,11 +1,18 @@
-# not oop :( vergeet niet _recursie_ woohoo
-import typing
 import re
-import copy
 from Ltoken import TokenDict, LToken
 import errorClass as ec
+from typing import List, Sequence, TypeVar, Union, Tuple, Dict, IO
 
-def listNoneCheck(checkList, count = 0):
+T = TypeVar('T')
+
+
+def listNoneCheck(checkList: List[T], count: int = 0)-> Union[T, None]:
+    """
+    Returns the first instance of an item in the list that is not None or None if every item in the list is None
+    :param checkList: The list we check for not None items
+    :param count: The current index where we are searching
+    :return: The first instance of an item in the list that is not None or None of all are None
+    """
     if count == len(checkList):
         return None
     if checkList[count] == None:
@@ -13,23 +20,42 @@ def listNoneCheck(checkList, count = 0):
     else:
         return checkList[count]
 
-def tokenRegex(fileLine, regexDict, count = 0):
-    if count == len(regexDict):
-        return None
+def tokenRegex(fileLine: str, regexDict: Tuple[str, str])-> Union[None, str]:
+    """
+    Uses regex to check what type of token is used
+    :param fileLine: Current line of the file to check for the regex
+    :param regexDict: A tuple of dictionary item to get the regex from
+    :return: None or the name of the found token
+    """
     if re.match(regexDict[1], fileLine) is not None:
         return regexDict[0]
-    return tokenRegex(fileLine, regexDict, count + 1)
-
-def getTokenType(fileLine, tokenDict, lineNum, count = 0):
-    if count == len(tokenDict):
+    else:
         return None
+
+
+def getTokenType(fileLine: str, tokenDict: Dict[str,List[str]], lineNum: int)-> Union[None, LToken]: #object == Ltoken
+    """
+    Returns the type of the token from the current fileLine if any else return None
+    :param fileLine: current line of the executed file
+    :param tokenDict: dictionary containing all the possible tokens of a certain type
+    :param lineNum: current line number added to Ltoken for error reporting possibilities
+    :return:
+    """
     tokenr = listNoneCheck(list(map(lambda x: tokenRegex(fileLine, x), tokenDict[1].items())))
     if tokenr is not None:
         return LToken(tokenDict[0], tokenr, lineNum)
     else:
-        return getTokenType(fileLine, tokenDict, lineNum, count + 1)
+        return None
 
-def getArgument(types : list, string, count = 0):
+
+def getArgument(types: list, string: str, count:int = 0)->Union[Tuple[str, str], Tuple[None,None]]:
+    """
+    Returns the argument after a certain statement if any else return None, None
+    :param types: The possible options of types the string could contain
+    :param string: String to check for arguments
+    :param count: current index of typelist
+    :return: None,None if no argument was found else the argument type and value of the argument
+    """
     if len(types) == count:
         if re.match(r'^(@NO PROBLEMO)', string):
             return '1', 'int'
@@ -57,7 +83,14 @@ expectedArguments = {
 
 }
 
-def readLine(file, line = 0):
+def readLine(file: IO, line: int = 0)->Tuple[List[LToken], List[str]]:
+    """
+    Reads the current fileLine from a file and determines if it a valid token for the parser.
+    If the token should have an argument it will add this as another token to the list
+    :param file: current file we are reading
+    :param line: the linenumber we are on (for debugging mostly)
+    :return: returns a tuple of two lists the first list contains the tokens the second list contains errors if any
+    """
     fileLine = file.readline()
     line += 1
     tokenTypeList = list(map(lambda x: getTokenType(fileLine, x, line), TokenDict.items()))
@@ -111,5 +144,11 @@ def readLine(file, line = 0):
 
 
 def lex(filename : str):
+    """
+    Lexes the file of the given filename
+    :param filename: the name of the file
+    :return: A tuple of list containing the tokens and errors given bij the readLine function
+    """
     f = open(filename, "r")
+    print(type(f))
     return readLine(f)

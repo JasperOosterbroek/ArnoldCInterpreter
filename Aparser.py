@@ -1,14 +1,18 @@
 import copy
 
+from Ltoken import LToken
 from node import Node
 import errorClass as er
+from typing import List, Union, Tuple
+
+
 RuleDict = {
     'SOF': [
         ['IDENTIFIER', 'EOF'],
         ['SEPERATOR', 'EOF']
     ],
 
-    'IDENTIFIER': [ #block
+    'IDENTIFIER': [
         ['=']
     ],
     'DECLERATION':[
@@ -35,30 +39,43 @@ RuleDict = {
 
 }
 
-def longestListInList(list, count = 0):
-    if count == len(list) - 1:
+def longestListInList(checklist: List[Union[None, List[object]]], count:int = 0) -> Union[None, List[object]]:
+    """
+    Returns the longest List in a given set of Lists
+    :param checklist:
+    :param count:
+    :return: The longest list in checklist, can return None if all are None
+    """
+    if count == len(checklist) - 1:
         return list[count]
-    prevLongest = longestListInList(list, count+1)
-    if list[count] is not None:
+    prevLongest = longestListInList(checklist, count+1)
+    if checklist[count] is not None:
         if prevLongest[0] is None:
-            return list[count]
-        if len(prevLongest[0]) > len(list[count][0]):
+            return checklist[count]
+        if len(prevLongest[0]) > len(checklist[count][0]):
             return prevLongest
         else:
-            return list[count]
+            return checklist[count]
     return prevLongest
 
-# check of hier de regels kloppen
-
-def checkRules(tokenList, rulelist, varlist, pos, count = 0):
+def checkRules(tokenList: List[LToken], rulelist: List[str], varlist: List[str], pos: int, count:int = 0)-> Tuple[List[LToken], List[str]]:
+    """
+    Checks if the current list of tokens is conform to the given rules in the RuleDict
+    :param tokenList: list of all the tokens of the program
+    :param rulelist: list of the rules to use as guidlines
+    :param varlist: List of currently assigned variables
+    :param pos: post to start in the tokenList
+    :param count: current stepcount in the tokenList and in ruleList
+    :return: A tuple, first element is a list of the tokens, the second element is a list of the encountered errors
+    """
     errorList = []
     if(len(rulelist) == 0):
         return [], errorList
     if tokenList[pos+count].type == 'IDENTIFIER' and tokenList[pos+count].value not in varlist:
         errorList.append(er.Error('Parse error', "Undeclared variable {} on line {}".format(tokenList[pos+count].value, tokenList[pos+count].line)))
         return [], errorList
-    if tokenList[pos+count].type == 'VARIABLE' and tokenList[pos+count] not in varlist:
-        errorList.append(er.Error('Parse error',"Undefined variable {} on line {}".format(tokenList[pos + count].value, tokenList[pos + count].line)))
+    if tokenList[pos+count].type == 'VARIABLE' and tokenList[pos+count].value not in varlist:
+        errorList.append(er.Error('Parse error', "Undefined variable {} on line {}".format(tokenList[pos + count].value, tokenList[pos + count].line)))
         return [], errorList
     if tokenList[pos+count].type == rulelist[count] or tokenList[pos+count].value == rulelist[count]:
         if tokenList[pos+count].type in RuleDict or tokenList[pos+count].value in RuleDict:
@@ -90,7 +107,14 @@ def checkRules(tokenList, rulelist, varlist, pos, count = 0):
     return [], errorList
 
 
-def createTree(nodeList, count = 0, isreversed = False):
+def createTree(nodeList: List[LToken], count: int = 0, isreversed: bool = False)-> Node:
+    """
+    Creates an AST from the given nodeList, is reversable
+    :param nodeList: List of the nodes to build a tree from
+    :param count: current position in the nodelist
+    :param isreversed: if the tree has passed an assignment it should reverse to have the correct order determined by the code specifications
+    :return: first node in the tree, using this node we can find all the other nodes
+    """
     if nodeList[count].type == 'SEPERATOR':
         count = count + 1
     if count >= len(nodeList) -1 or nodeList[count+1].type == 'SEPERATOR':
@@ -106,13 +130,20 @@ def createTree(nodeList, count = 0, isreversed = False):
     if nodeList[count].type == "IO":
         return Node(nodeList[count].value, createTree(nodeList, count + 1, isreversed))
     operatorNode = createTree(nodeList, count + 1, isreversed)
-    if isreversed: #only if last
+    if isreversed:
         operatorNode.right = nodeList[count].value
         return operatorNode
     operatorNode.left = nodeList[count].value
     return operatorNode
 
-def parse(tokenList, varlist = [], count=0):
+def parse(tokenList: List[LToken], varlist: List[str] = [], count:int =0)-> Tuple[Node, str]:
+    """
+    Parses the current tokenList, checks the rules and creates an ast from the deepest possible rulesafe path
+    :param tokenList: List of all the tokens
+    :param varlist: List of variables assigned in the program
+    :param count: current possition of the tokenList
+    :return: returns a tuple containing the list of all the first nodes, and a list of encountered errors if any
+    """
     errorList = []
     tmpVarlist = copy.deepcopy(varlist)
     if count == len(tokenList) - 1:
@@ -135,6 +166,7 @@ def parse(tokenList, varlist = [], count=0):
             if tokenList[count].type == 'DECLERATION':
                 if tokenList[count].value not in tmpVarlist:
                     tmpVarlist.append(tokenList[count].value)
+                    print(tmpVarlist)
                 else:
                     errorList.append(er.Error('Parse error', 'Multiple declerations of {} on line {}'.format(tokenList[count].value, tokenList[count].line)))
             if tokenList[count].type in RuleDict or tokenList[count].value in RuleDict:
@@ -148,7 +180,7 @@ def parse(tokenList, varlist = [], count=0):
                     nodeValue = None
                     if tokenList[count].value == "STARTWHILE":
                         nodeValue = "while"
-                    lhs = createTree(longestListInList(list(map(lambda x: checkRules(tokenList, x,tmpVarlist, count + 1), possibleRules))))
+                    lhs = createTree(longestListInList(list(map(lambda x: checkRules(tokenList, x, tmpVarlist, count + 1), possibleRules))))
                     rhs = parse(tokenList, tmpVarlist, count + 2)
                     return [Node(nodeValue, lhs, rhs)], errorList
                 else:

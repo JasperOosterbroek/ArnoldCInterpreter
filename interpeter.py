@@ -1,26 +1,27 @@
 import Aparser as prs
 import lexer
-import node
+from node import Node
 import copy
 import functools
 import errorClass as er
+from typing import List, Union
 
-def add_command(x, y):
+def add_command(x:int,y:int)->int:
     return x + y
 
-def mul_command(x,y):
+def mul_command(x:int,y:int)->int:
     return x * y
 
-def min_command(x,y):
+def min_command(x:int,y:int)->int:
     return x - y
 
-def gTCompare(x, y):
+def gTCompare(x:int,y:int)->int:
     return int(x > y)
 
-def div_command(x, y):
+def div_command(x:int,y:int)->int:
     return int(x / y) # Cast to int to prevent floats
 
-def mod_command(x,y):
+def mod_command(x:int,y:int)->int:
     return x % y
 
 class programstate:
@@ -49,7 +50,14 @@ operatorDict = {
     '%': mod_command
 }
 
-def executeStep(curNode, progState):
+#zou alleen programstate mogen returnen imo
+def executeStep(curNode: Node, progState: programstate)-> Union[programstate, int]:
+    """
+    Execute current Node step
+    :param curNode: the current Node that needs to be executed
+    :param progState: the programstate, this contains variables and errors
+    :return: either programstate if done, or an int if a calculation was made
+    """
     progStateCopy = copy.deepcopy(progState)
     if curNode.right is None and curNode.left is None:
         return progStateCopy
@@ -64,15 +72,15 @@ def executeStep(curNode, progState):
     lhs = curNode.left if curNode.left not in progStateCopy.variables else progStateCopy.variables[curNode.left]
     rhs = curNode.right if curNode.right not in progStateCopy.variables else progStateCopy.variables[curNode.right]
     if curNode.data in operatorDict:
-        if type(rhs) == node.Node and type (lhs) == node.Node:
+        if type(rhs) == Node and type (lhs) == Node:
             return operatorDict[curNode.data](executeStep(lhs,progStateCopy), executeStep(rhs, progStateCopy))
-        elif type(rhs) == node.Node:
+        elif type(rhs) == Node:
             return operatorDict[curNode.data](int(lhs), executeStep(rhs, progStateCopy))
-        elif type(lhs) == node.Node:
+        elif type(lhs) == Node:
             return operatorDict[curNode.data](executeStep(lhs, progStateCopy), int(rhs))
         return operatorDict[curNode.data](int(lhs), int(rhs))
     if curNode.data == '=':
-        if type(rhs) == node.Node:
+        if type(rhs) == Node:
             progStateCopy.variables[curNode.left] = executeStep(rhs, progStateCopy)
             return progStateCopy
         if rhs is not None:
@@ -82,7 +90,12 @@ def executeStep(curNode, progState):
         print(lhs)  # JASPER FOR THE LOVE OF GOD DEZE PRINT NIET VERWIJDEREN!!!!!!!!!
         return progStateCopy
 
-def run(filename):
+def run(filename:str)->None:
+    """
+    Lexes, parses and executes a program written in ArnoldC from given filename file
+    :param filename: Name of the file to use
+    :return: None
+    """
     output = lexer.lex(filename)
     print(output)
     if len(output[1]) > 0:
