@@ -3,7 +3,7 @@ import copy
 from Ltoken import LToken
 from node import Node
 import errorClass as er
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, TypeVar
 
 
 RuleDict = {
@@ -39,7 +39,10 @@ RuleDict = {
 
 }
 
-def longestListInList(checklist: List[Union[None, List[object]]], count:int = 0) -> Union[None, List[object]]:
+T = TypeVar('T')
+
+
+def longestListInList(checklist: List[List[T]], count: int = 0) -> List[T]:
     """
     Returns the longest List in a given set of Lists
     :param checklist:
@@ -47,7 +50,7 @@ def longestListInList(checklist: List[Union[None, List[object]]], count:int = 0)
     :return: The longest list in checklist, can return None if all are None
     """
     if count == len(checklist) - 1:
-        return list[count]
+        return checklist[count]
     prevLongest = longestListInList(checklist, count+1)
     if checklist[count] is not None:
         if prevLongest[0] is None:
@@ -58,7 +61,8 @@ def longestListInList(checklist: List[Union[None, List[object]]], count:int = 0)
             return checklist[count]
     return prevLongest
 
-def checkRules(tokenList: List[LToken], rulelist: List[str], varlist: List[str], pos: int, count:int = 0)-> Tuple[List[LToken], List[str]]:
+
+def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[str], varlist: List[str], pos: int, count:int = 0) -> Tuple[List[LToken], List[er.Error]]:
     """
     Checks if the current list of tokens is conform to the given rules in the RuleDict
     :param tokenList: list of all the tokens of the program
@@ -101,7 +105,7 @@ def checkRules(tokenList: List[LToken], rulelist: List[str], varlist: List[str],
                 if len(next[0]) is 0:
                     errorList.append(er.Error('Parse error', "Expected '{}', got '{}' on line {}".format(rulelist[count+1], tokenList[pos].value, tokenList[pos].line)))
                     return [], errorList
-                return [tokenList[pos+count]] + next[0], errorList, next[1]
+                return [tokenList[pos+count]] + next[0], errorList + next[1]
     elif tokenList[pos+count].type in RuleDict or tokenList[pos+count].value in RuleDict:
         return [], errorList
     return [], errorList
@@ -136,7 +140,8 @@ def createTree(nodeList: List[LToken], count: int = 0, isreversed: bool = False)
     operatorNode.left = nodeList[count].value
     return operatorNode
 
-def parse(tokenList: List[LToken], varlist: List[str] = [], count:int =0)-> Tuple[Node, str]:
+
+def parse(tokenList: Tuple[List[LToken], List[er.Error]], varlist: List[str] = [], count:int =0)-> Union[Tuple[List[Node], List[er.Error]], Tuple[list, List[er.Error]]]:
     """
     Parses the current tokenList, checks the rules and creates an ast from the deepest possible rulesafe path
     :param tokenList: List of all the tokens
@@ -166,7 +171,6 @@ def parse(tokenList: List[LToken], varlist: List[str] = [], count:int =0)-> Tupl
             if tokenList[count].type == 'DECLERATION':
                 if tokenList[count].value not in tmpVarlist:
                     tmpVarlist.append(tokenList[count].value)
-                    print(tmpVarlist)
                 else:
                     errorList.append(er.Error('Parse error', 'Multiple declerations of {} on line {}'.format(tokenList[count].value, tokenList[count].line)))
             if tokenList[count].type in RuleDict or tokenList[count].value in RuleDict:

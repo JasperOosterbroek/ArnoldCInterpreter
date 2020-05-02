@@ -50,7 +50,13 @@ operatorDict = {
     '%': mod_command
 }
 
-#zou alleen programstate mogen returnen imo
+def executeDebugStep(f):
+    def inner(p, progstate):
+        print(p)
+        print(progstate)
+        return f(p, progstate)
+    return inner
+
 def executeStep(curNode: Node, progState: programstate)-> Union[programstate, int]:
     """
     Execute current Node step
@@ -90,26 +96,24 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
         print(lhs)  # JASPER FOR THE LOVE OF GOD DEZE PRINT NIET VERWIJDEREN!!!!!!!!!
         return progStateCopy
 
-def run(filename:str)->None:
+def run(filename:str, debug:bool = False)->None:
     """
     Lexes, parses and executes a program written in ArnoldC from given filename file
     :param filename: Name of the file to use
     :return: None
     """
+
+
     output = lexer.lex(filename)
-    print(output)
     if len(output[1]) > 0:
             print(output[1])
     else:
         pList = prs.parse(output[0])
-        print(pList)
         if len(pList[1]) > 0:
             print(pList[1])
         else:
             progstate = programstate()
-            print(pList[0])
             for p in pList[0]:
-                print(progstate)
                 if len(progstate.errors) > 0:
                     print(progstate)
                 else:

@@ -48,7 +48,7 @@ def getTokenType(fileLine: str, tokenDict: Dict[str,List[str]], lineNum: int)-> 
         return None
 
 
-def getArgument(types: list, string: str, count:int = 0)->Union[Tuple[str, str], Tuple[None,None]]:
+def getArgument(types: list, string: str, count: int = 0) -> Union[Tuple[str, str], Tuple[None,None]]:
     """
     Returns the argument after a certain statement if any else return None, None
     :param types: The possible options of types the string could contain
@@ -150,5 +150,4 @@ def lex(filename : str):
     :return: A tuple of list containing the tokens and errors given bij the readLine function
     """
     f = open(filename, "r")
-    print(type(f))
     return readLine(f)
