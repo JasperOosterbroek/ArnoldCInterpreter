@@ -98,7 +98,7 @@ def readLine(file: IO, line: int = 0)->Tuple[List[LToken], List[str]]:
     tokenlist = []
     errorList = []
     if token is None:
-        errorList.append(ec.Error('Syntax Error', "Invalid syntax {} on line {}".format(fileLine, line)))
+        errorList.append(ec.SyntaxError("Invalid syntax {} on line {}".format(fileLine, line)))
     elif token.value in TokenDict['EOF'].keys():
         return ([token], []) # last return statement, the break of this recursion
     elif token.value in TokenDict[token.type].keys() and token.type in expectedArguments:
@@ -121,9 +121,9 @@ def readLine(file: IO, line: int = 0)->Tuple[List[LToken], List[str]]:
                     elif argumentType == 'string':
                         tokenlist.append(LToken('LITERALSTRING', argumentValue.rstrip(), line))
             else:
-                errorList.append(ec.Error('Syntax Error', "Invalid argument \"{}\" on line {}".format(substring, line)))
+                errorList.append(ec.SyntaxError("Invalid argument \"{}\" on line {}".format(substring, line)))
         else:
-            errorList.append(ec.Error('Syntax Error', "missing argument after \"{}\" on line {}".format(fileLine, line)))
+            errorList.append(ec.SyntaxError("missing argument after \"{}\" on line {}".format(fileLine, line)))
     elif token.value in TokenDict['SEPERATOR'].keys():
         if token.value == "STARTASSIGNVARIABLE":
             substring = re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip().rstrip()
@@ -133,9 +133,9 @@ def readLine(file: IO, line: int = 0)->Tuple[List[LToken], List[str]]:
                     tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip(), line))
                     tokenlist.append(LToken('OPERATOR', '=', line))
                 else:
-                    errorList.append(ec.Error('Syntax Error', "Invalid argument \"{}\" on line {}".format(substring, line)))
+                    errorList.append(ec.SyntaxError("Invalid argument \"{}\" on line {}".format(substring, line)))
             else:
-                errorList.append(ec.Error('Syntax Error', "missing argument after \"{}\" on line {}".format(fileLine, line)))
+                errorList.append(ec.SyntaxError("missing argument after \"{}\" on line {}".format(fileLine, line)))
 
     tokenlist.insert(0, token)
     next = readLine(file, line)

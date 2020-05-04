@@ -40,8 +40,6 @@ RuleDict = {
 }
 
 T = TypeVar('T')
-
-
 def longestListInList(checklist: List[List[T]], count: int = 0) -> List[T]:
     """
     Returns the longest List in a given set of Lists
@@ -76,10 +74,10 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
     if(len(rulelist) == 0):
         return [], errorList
     if tokenList[pos+count].type == 'IDENTIFIER' and tokenList[pos+count].value not in varlist:
-        errorList.append(er.Error('Parse error', "Undeclared variable {} on line {}".format(tokenList[pos+count].value, tokenList[pos+count].line)))
+        errorList.append(er.ParseError("Undeclared variable {} on line {}".format(tokenList[pos+count].value, tokenList[pos+count].line)))
         return [], errorList
     if tokenList[pos+count].type == 'VARIABLE' and tokenList[pos+count].value not in varlist:
-        errorList.append(er.Error('Parse error', "Undefined variable {} on line {}".format(tokenList[pos + count].value, tokenList[pos + count].line)))
+        errorList.append(er.ParseError("Undefined variable {} on line {}".format(tokenList[pos + count].value, tokenList[pos + count].line)))
         return [], errorList
     if tokenList[pos+count].type == rulelist[count] or tokenList[pos+count].value == rulelist[count]:
         if tokenList[pos+count].type in RuleDict or tokenList[pos+count].value in RuleDict:
@@ -89,13 +87,13 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
                 if count is not len(rulelist) - 1:
                     next = checkRules(tokenList, rulelist, varlist, pos + len(longestInNextList[0]), count + 1)
                     if next[0] is None:
-                        errorList.append(er.Error('Parse error', "Expected '{}', got '{}' on line {}".format(rulelist[count+1],tokenList[pos].value, tokenList[pos].line)))
+                        errorList.append(er.ParseError("Expected '{}', got '{}' on line {}".format(rulelist[count+1],tokenList[pos].value, tokenList[pos].line)))
                         return [], errorList
                     return [tokenList[pos + count]] + longestInNextList[0] + next[0], errorList + longestInNextList[1] + next[1]
                 return [tokenList[pos+count]] + longestInNextList[0], errorList + longestInNextList[1]
             if len(longestInNextList[1]) > 0:
                 return [], longestInNextList[1]
-            errorList.append(er.Error('Parse error', "Expected '{}', got '{}' on line {}".format(rulelist[count],tokenList[pos+1].value, tokenList[pos+1].line)))
+            errorList.append(er.ParseError("Expected '{}', got '{}' on line {}".format(rulelist[count],tokenList[pos+1].value, tokenList[pos+1].line)))
             return [], errorList
         else:
             if count == len(rulelist) - 1:
@@ -103,7 +101,7 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
             else:
                 next = checkRules(tokenList, rulelist, varlist, pos, count + 1)
                 if len(next[0]) is 0:
-                    errorList.append(er.Error('Parse error', "Expected '{}', got '{}' on line {}".format(rulelist[count+1], tokenList[pos].value, tokenList[pos].line)))
+                    errorList.append(er.ParseError("Expected '{}', got '{}' on line {}".format(rulelist[count+1], tokenList[pos].value, tokenList[pos].line)))
                     return [], errorList
                 return [tokenList[pos+count]] + next[0], errorList + next[1]
     elif tokenList[pos+count].type in RuleDict or tokenList[pos+count].value in RuleDict:
@@ -155,7 +153,7 @@ def parse(tokenList: Tuple[List[LToken], List[er.Error]], varlist: List[str] = [
         if tokenList[count].type == 'EOF':
             return [], errorList # error list append eof not found
         else:
-            errorList.append(er.Error('Parse error', "Unexpected end of file at line {}"))
+            errorList.append(er.ParseError("Unexpected end of file at line {}"))
             return [], errorList
     # First line is always a SOF
     if count == 0:
@@ -172,7 +170,7 @@ def parse(tokenList: Tuple[List[LToken], List[er.Error]], varlist: List[str] = [
                 if tokenList[count].value not in tmpVarlist:
                     tmpVarlist.append(tokenList[count].value)
                 else:
-                    errorList.append(er.Error('Parse error', 'Multiple declerations of {} on line {}'.format(tokenList[count].value, tokenList[count].line)))
+                    errorList.append(er.ParseError('Multiple declerations of {} on line {}'.format(tokenList[count].value, tokenList[count].line)))
             if tokenList[count].type in RuleDict or tokenList[count].value in RuleDict:
                 possibleRules = []
                 if tokenList[count].type in RuleDict:
@@ -196,5 +194,5 @@ def parse(tokenList: Tuple[List[LToken], List[er.Error]], varlist: List[str] = [
                         curparse[0].insert(0, tokenList[count])
                         nextparse = parse(tokenList, tmpVarlist, count + len(curparse[0]))
                         return [createTree(curparse[0])] + nextparse[0], errorList + nextparse[1]
-    errorList.append(er.Error('Parse error', "Unexpected {} on line: {}".format(tokenList[count].value, tokenList[count].line)))
+    errorList.append(er.ParseError("Unexpected {} on line: {}".format(tokenList[count].value, tokenList[count].line)))
     return [], errorList
