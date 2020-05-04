@@ -7,7 +7,10 @@ TokenDict = {
                     '*': "(YOU'RE FIRED)",
                     '/': "(HE HAD TO SPLIT)",
                     '>': "(LET OFF SOME STEAM BENNET)",
-                    '%': "(I LET HIM GO)"
+                    '%': "(I LET HIM GO)",
+                    '==': "(YOU ARE NOT YOU YOU ARE ME)",
+                    '||': "(CONSIDER THAT A DIVORCE)",
+                    '&&': "(KNOCK KNOCK)"
                 },
     'SEPERATOR': {'STARTASSIGNVARIABLE': "(GET TO THE CHOPPER)",
                     'ENDASSIGNVARIABLE': "(ENOUGH TALK)"},

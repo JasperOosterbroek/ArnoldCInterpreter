@@ -15,7 +15,7 @@ def mul_command(x:int,y:int)->int:
 def min_command(x:int,y:int)->int:
     return x - y
 
-def gTCompare(x:int,y:int)->int:
+def gt_compare(x:int,y:int)->int:
     return int(x > y)
 
 def div_command(x:int,y:int)->int:
@@ -23,6 +23,15 @@ def div_command(x:int,y:int)->int:
 
 def mod_command(x:int,y:int)->int:
     return x % y
+
+def equals_compare(x:int, y:int)->int:
+    return int(x == y)
+
+def or_compare(x:int, y:int)->int:
+    return int(x or y)
+
+def and_compare(x:int, y:int)->int:
+    return int(x and y)
 
 class programstate:
 
@@ -44,10 +53,13 @@ class programstate:
 operatorDict = {
     '-': min_command,
     '+': add_command,
-    '>': gTCompare,
+    '>': gt_compare,
     '*': mul_command,
     '/': div_command,
-    '%': mod_command
+    '%': mod_command,
+    '==': equals_compare,
+    '||': or_compare,
+    '&&': and_compare
 }
 
 def executeDebugStep(f):
@@ -96,14 +108,12 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
         print(lhs)  # JASPER FOR THE LOVE OF GOD DEZE PRINT NIET VERWIJDEREN!!!!!!!!!
         return progStateCopy
 
-def run(filename:str, debug:bool = False)->None:
+def run(filename:str)->None:
     """
     Lexes, parses and executes a program written in ArnoldC from given filename file
     :param filename: Name of the file to use
     :return: None
     """
-
-
     output = lexer.lex(filename)
     if len(output[1]) > 0:
             print(output[1])

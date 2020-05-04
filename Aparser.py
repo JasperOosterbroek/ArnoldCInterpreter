@@ -70,6 +70,7 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
     :param count: current stepcount in the tokenList and in ruleList
     :return: A tuple, first element is a list of the tokens, the second element is a list of the encountered errors
     """
+
     errorList = []
     if(len(rulelist) == 0):
         return [], errorList
