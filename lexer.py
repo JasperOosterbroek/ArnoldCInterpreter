@@ -78,12 +78,12 @@ expectedArguments = {
     'OPERATOR': ['int', 'variable'],
     'IO': ['variable', 'int', 'string'],
     'LITERAL': ['int', 'variable'],
-    'STARTBLOCK': ['int', 'variable'],
+    'STARTWHILE': ['int', 'variable'],
     'IDENTIFIER': ['variable']
 
 }
 
-def readLine(file: IO, line: int = 0)->Tuple[List[LToken], List[str]]:
+def readLine(fileList: List[str], line: int = 0)->Tuple[List[LToken], List[str]]:
     """
     Reads the current fileLine from a file and determines if it a valid token for the parser.
     If the token should have an argument it will add this as another token to the list
@@ -91,20 +91,28 @@ def readLine(file: IO, line: int = 0)->Tuple[List[LToken], List[str]]:
     :param line: the linenumber we are on (for debugging mostly)
     :return: returns a tuple of two lists the first list contains the tokens the second list contains errors if any
     """
-    fileLine = file.readline()
+    if line == len(fileList):
+        return ([LToken('ENDOFFILE', None, line+1)], [])
+
+    fileLine = fileList[line]
     line += 1
     tokenTypeList = list(map(lambda x: getTokenType(fileLine, x, line), TokenDict.items()))
     token = listNoneCheck(tokenTypeList)
     tokenlist = []
     errorList = []
+
     if token is None:
         errorList.append(ec.SyntaxError("Invalid syntax {} on line {}".format(fileLine, line)))
-    elif token.value in TokenDict['EOF'].keys():
-        return ([token], []) # last return statement, the break of this recursion
-    elif token.value in TokenDict[token.type].keys() and token.type in expectedArguments:
+    # elif token.value in TokenDict['ENDBLOCK'].keys():
+    #     print(fileLine)
+    #     return ([token], []) # last return statement, the break of this recursion
+    elif token.value in TokenDict[token.type].keys() and (token.type in expectedArguments or token.value in expectedArguments):
         substring = re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip().rstrip()
         if len(substring) > 0:
-            argumentValue, argumentType = getArgument(expectedArguments[token.type], substring)
+            if token.type in expectedArguments:
+                argumentValue, argumentType = getArgument(expectedArguments[token.type], substring)
+            elif token.value in expectedArguments:
+                argumentValue, argumentType = getArgument(expectedArguments[token.value], substring)
             if argumentValue is not None:
                 if token.value == 'DECLERATION' or token.type == 'LITERAL':
                     if token.value == 'DECLERATION':
@@ -138,7 +146,7 @@ def readLine(file: IO, line: int = 0)->Tuple[List[LToken], List[str]]:
                 errorList.append(ec.SyntaxError("missing argument after \"{}\" on line {}".format(fileLine, line)))
 
     tokenlist.insert(0, token)
-    next = readLine(file, line)
+    next = readLine(fileList, line)
     return tokenlist + next[0], errorList + next[1]
 
 
@@ -149,5 +157,5 @@ def lex(filename : str):
     :param filename: the name of the file
     :return: A tuple of list containing the tokens and errors given bij the readLine function
     """
-    f = open(filename, "r")
-    return readLine(f)
+    # f = open(filename, "r")
+    return readLine(filename)

@@ -15,13 +15,13 @@ TokenDict = {
     'SEPERATOR': {'STARTASSIGNVARIABLE': "(GET TO THE CHOPPER)",
                     'ENDASSIGNVARIABLE': "(ENOUGH TALK)"},
     'STARTBLOCK': {
-        'STARTWHILE': "(STICK AROUND)"
+        'STARTWHILE': "(STICK AROUND)",
+        'STARTMAIN': "(IT'S SHOWTIME)"
     },
     'ENDBLOCK':{
-        'ENDWHILE': "(CHILL)"
+        'ENDWHILE': "(CHILL)",
+        'ENDMAIN': "(YOU HAVE BEEN TERMINATED)"
     },
-    'SOF': {'start': "(IT'S SHOWTIME)"},
-    'EOF': {'end': "(YOU HAVE BEEN TERMINATED)"},
     'IDENTIFIER': {'DECLERATION': "(HEY CHRISTMAS TREE)"},
     # for literals it's not so interesting what the 'value' is rather then
     # that it is a literal and what the actual value is

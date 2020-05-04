@@ -10,4 +10,9 @@ if len(sys.argv) > 1:
 if debug:
     executeStep = interpeter.executeDebugStep(interpeter.executeStep)
 
-interpeter.run(file)
+lineList = list()
+with open(file) as f:
+  for line in f:
+    lineList.append(line)
+
+interpeter.run(lineList)

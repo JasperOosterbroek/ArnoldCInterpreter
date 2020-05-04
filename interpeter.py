@@ -77,6 +77,7 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
     :return: either programstate if done, or an int if a calculation was made
     """
     progStateCopy = copy.deepcopy(progState)
+    # print(curNode)
     if curNode.right is None and curNode.left is None:
         return progStateCopy
     if curNode.data == 'while':
@@ -115,15 +116,18 @@ def run(filename:str)->None:
     :return: None
     """
     output = lexer.lex(filename)
+    print(output)
     if len(output[1]) > 0:
             print(output[1])
     else:
-        pList = prs.parse(output[0])
-        if len(pList[1]) > 0:
-            print(pList[1])
+        parseState = prs.ParseState()
+        pList = prs.parse(output[0], parseState)
+        print(pList)
+        if len(pList.errorList) > 0:
+            print(pList.errorList)
         else:
             progstate = programstate()
-            for p in pList[0]:
+            for p in pList.treeList:
                 if len(progstate.errors) > 0:
                     print(progstate)
                 else:
