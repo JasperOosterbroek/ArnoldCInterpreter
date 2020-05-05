@@ -14,5 +14,4 @@ lineList = list()
 with open(file) as f:
   for line in f:
     lineList.append(line)
-
 interpeter.run(lineList)

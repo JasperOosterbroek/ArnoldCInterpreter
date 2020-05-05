@@ -16,15 +16,27 @@ TokenDict = {
                     'ENDASSIGNVARIABLE': "(ENOUGH TALK)"},
     'STARTBLOCK': {
         'STARTWHILE': "(STICK AROUND)",
-        'STARTMAIN': "(IT'S SHOWTIME)"
+        'STARTMAIN': "(IT'S SHOWTIME)",
+        'STARTIF': "(BECAUSE I'M GOING TO SAY PLEASE)",
+        'STARTMETHOD': "(LISTEN TO ME VERY CAREFULLY)",
+    },
+    'ALTERNATIVEBLOCK':{
+        'ELSE': "(BULLSHIT)",
+        'ENDMETHODVARIABLES': "(GIVE THESE PEOPLE AIR)"
     },
     'ENDBLOCK':{
         'ENDWHILE': "(CHILL)",
-        'ENDMAIN': "(YOU HAVE BEEN TERMINATED)"
+        'ENDMAIN': "(YOU HAVE BEEN TERMINATED)",
+        'ENDIF': "(YOU HAVE NO RESPECT FOR LOGIC)",
+        'ENDMETHOD': "(HASTA LA VISTA, BABY)"
     },
     'IDENTIFIER': {'DECLERATION': "(HEY CHRISTMAS TREE)"},
-    # for literals it's not so interesting what the 'value' is rather then
-    # that it is a literal and what the actual value is
+    'METHOD':{
+        'ASSIGNVARIABLE':"(GET YOUR ASS TO MARS)",
+        'CALLMETHOD': "(DO IT NOW)",
+        'METHODARGUMENT': "(I NEED YOUR CLOTHES YOUR BOOTS AND YOUR MOTORCYCLE)",
+        'RETURN' : "(I'LL BE BACK)"
+    },
     'LITERAL': {'SETVALUE': "(HERE IS MY INVITATION)",
                 'FALSE': "@NO PROBLEMO",
                 'TRUE': "@I LIED"},

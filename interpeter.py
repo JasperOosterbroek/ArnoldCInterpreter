@@ -88,6 +88,16 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
             return executeStep(curNode, progStateCopy)
         else:
             return progStateCopy
+    if curNode.data == 'if':
+        print(curNode)
+        condition = curNode.left if curNode.left not in progStateCopy.variables else progStateCopy.variables[curNode.left]
+        lhs = curNode.center
+        rhs = curNode.right
+        if int(condition) == 1:
+            progStateCopy = functools.reduce(lambda x,y: executeStep(y, x), lhs, progStateCopy)
+        elif rhs is not None:
+            progStateCopy = functools.reduce(lambda x,y: executeStep(y, x), rhs, progStateCopy)
+        return progStateCopy
     lhs = curNode.left if curNode.left not in progStateCopy.variables else progStateCopy.variables[curNode.left]
     rhs = curNode.right if curNode.right not in progStateCopy.variables else progStateCopy.variables[curNode.right]
     if curNode.data in operatorDict:
@@ -108,6 +118,8 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
     if curNode.data == 'PRINT':
         print(lhs)  # JASPER FOR THE LOVE OF GOD DEZE PRINT NIET VERWIJDEREN!!!!!!!!!
         return progStateCopy
+    progStateCopy.errors.append(er.RuntimeError("Unhandleable Node Data {}".format(curNode.data)))
+    return progStateCopy
 
 def run(filename:str)->None:
     """
@@ -127,8 +139,13 @@ def run(filename:str)->None:
             print(pList.errorList)
         else:
             progstate = programstate()
-            for p in pList.treeList:
-                if len(progstate.errors) > 0:
-                    print(progstate)
-                else:
-                    progstate = executeStep(p, progstate)
+            if 'main' in pList.methodDict:
+                for p in pList.methodDict['main'].tree:
+                    if len(progstate.errors) > 0:
+                        print(progstate.errors)
+                        exit()
+                    else:
+                        print(p)
+                        progstate = executeStep(p, progstate)
+            else:
+                print(er.RuntimeError("No Main method found"))

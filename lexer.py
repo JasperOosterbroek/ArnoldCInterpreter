@@ -79,8 +79,13 @@ expectedArguments = {
     'IO': ['variable', 'int', 'string'],
     'LITERAL': ['int', 'variable'],
     'STARTWHILE': ['int', 'variable'],
-    'IDENTIFIER': ['variable']
-
+    'IDENTIFIER': ['variable'],
+    'STARTIF': ['int', 'variable'],
+    'ASSIGNVARIABLE': ['variable'],
+    'ASSIGNMETHODDARGUMENT': ['variable'],
+    'STARTMETHOD': ['variable'],
+    'METHODARGUMENT': ['variable'],
+    'RETURN':['variable', 'int']
 }
 
 def readLine(fileList: List[str], line: int = 0)->Tuple[List[LToken], List[str]]:
@@ -94,18 +99,19 @@ def readLine(fileList: List[str], line: int = 0)->Tuple[List[LToken], List[str]]
     if line == len(fileList):
         return ([LToken('ENDOFFILE', None, line+1)], [])
 
-    fileLine = fileList[line]
-    line += 1
+    fileLine = fileList[line].rstrip()
+    if fileLine == "":
+        line += 1
+        next = readLine(fileList, line)
+        return next[0], next[1]
     tokenTypeList = list(map(lambda x: getTokenType(fileLine, x, line), TokenDict.items()))
+    line += 1
     token = listNoneCheck(tokenTypeList)
     tokenlist = []
     errorList = []
 
     if token is None:
-        errorList.append(ec.SyntaxError("Invalid syntax {} on line {}".format(fileLine, line)))
-    # elif token.value in TokenDict['ENDBLOCK'].keys():
-    #     print(fileLine)
-    #     return ([token], []) # last return statement, the break of this recursion
+        errorList.append(ec.SyntaxError("Invalid syntax {} on line {}".format(fileLine, line+1)))
     elif token.value in TokenDict[token.type].keys() and (token.type in expectedArguments or token.value in expectedArguments):
         substring = re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip().rstrip()
         if len(substring) > 0:
@@ -114,11 +120,11 @@ def readLine(fileList: List[str], line: int = 0)->Tuple[List[LToken], List[str]]
             elif token.value in expectedArguments:
                 argumentValue, argumentType = getArgument(expectedArguments[token.value], substring)
             if argumentValue is not None:
-                if token.value == 'DECLERATION' or token.type == 'LITERAL':
-                    if token.value == 'DECLERATION':
-                        token.type = 'DECLERATION'
+                if token.value == 'DECLERATION' or token.type == 'LITERAL' or token.value == 'STARTMETHOD' or token.value == 'METHODARGUMENT':
+                    if token.value == 'DECLERATION' or token.value == 'STARTMETHOD' or token.value == 'METHODARGUMENT':
+                        token.type = token.value
                     token.value = argumentValue
-                elif token.value == 'STARTASSIGNVARIABLE':
+                elif token.value == 'STARTASSIGNVARIABLE' or token.value == "ASSIGNVARIABLE":
                     tokenlist.append(LToken('IDENTIFIER', argumentValue.rstrip(), line))
                     tokenlist.append(LToken('OPERATOR', '=', line))
                 else:
@@ -144,7 +150,14 @@ def readLine(fileList: List[str], line: int = 0)->Tuple[List[LToken], List[str]]
                     errorList.append(ec.SyntaxError("Invalid argument \"{}\" on line {}".format(substring, line)))
             else:
                 errorList.append(ec.SyntaxError("missing argument after \"{}\" on line {}".format(fileLine, line)))
-
+    elif token.value in TokenDict['METHOD'].keys():
+        substring = re.sub(TokenDict[token.type][token.value], '', fileLine).lstrip().rstrip()
+        arguments = re.findall('[a-zA-Z][\\w]*|-?[0-9]*', substring)
+        tokens = list(map(lambda x: LToken('ASSIGNMETHODDARGUMENT', x, line), filter(None, arguments)))
+        tokens[0].type = 'METHODNAME'
+        tokenlist += tokens
+        tokenlist.append(LToken('METHOD', 'ENDMETHODCALL', line))
+        # altijd minimaal 1 argument (method call) , en x aantal argumenten (method arguments) waar x 0 kan zijn
     tokenlist.insert(0, token)
     next = readLine(fileList, line)
     return tokenlist + next[0], errorList + next[1]

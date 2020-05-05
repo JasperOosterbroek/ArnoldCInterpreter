@@ -10,7 +10,7 @@ class Node:
     def __repr__(self):
         return str(self)
 
-class WhileNode(Node):
+class IfElseNode(Node):
     def __init__(self, data=None, left=None, center=None, right=None):
         self.left = left
         self.right = right
