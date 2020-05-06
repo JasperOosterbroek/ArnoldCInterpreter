@@ -83,7 +83,8 @@ RuleDict = {
         ['CALLMETHOD']
     ],
     'CALLMETHOD': [
-        ['METHODNAME']
+        ['METHODNAME'],
+        ['METHODNAME', 'ASSIGNMETHODDARGUMENT']
     ],
     'ASSIGNMETHODDARGUMENT': [
         ['ASSIGNMETHODDARGUMENT'],
@@ -160,6 +161,7 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
 
 
 def createTree(nodeList: List[LToken], count: int = 0, isreversed: bool = False)-> Union[Node,str]:
+    print("create tree",nodeList)
     """
     Creates an AST from the given nodeList, is reversable
     :param nodeList: List of the nodes to build a tree from
@@ -167,7 +169,7 @@ def createTree(nodeList: List[LToken], count: int = 0, isreversed: bool = False)
     :param isreversed: if the tree has passed an assignment it should reverse to have the correct order determined by the code specifications
     :return: first node in the tree, using this node we can find all the other nodes
     """
-    if nodeList[count].type == 'SEPERATOR' or nodeList[count].value == 'ENDMETHODCALL' or nodeList[count].value == 'ENDMETHODVARIABLES':
+    if nodeList[count].type == 'SEPERATOR' or nodeList[count].value == 'ENDMETHODCALL' or nodeList[count].value == 'ENDMETHODVARIABLES' or nodeList[count].value == 'ASSIGNVARIABLE':
         count = count + 1
     if count >= len(nodeList) -1 or nodeList[count+1].type == 'SEPERATOR'or nodeList[count+1].value == 'ENDMETHODCALL' or nodeList[count+1].value == 'ENDMETHODVARIABLES':
         return nodeList[count].value
@@ -198,9 +200,6 @@ def createTree(nodeList: List[LToken], count: int = 0, isreversed: bool = False)
         operatorNode.right = nodeList[count].value
         return operatorNode
 
-    print("nodelist",nodeList)
-    print("operatorNode",operatorNode)
-    print("count",count)
     operatorNode.left = nodeList[count].value
     return operatorNode
 
