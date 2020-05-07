@@ -42,13 +42,13 @@ class programstate:
         self.stepCount = stepCount
 
     def __str__(self):
-        return "variable: {}, methods: {}, stepCount: {}".format(self.variables, self.methods, self.stepCount)
+        return "Programstate: \nvariable: {}, methods: {}, stepCount: {}".format(self.variables, self.methods, self.stepCount)
 
     def __repr__(self):
         return str(self)
 
     def __deepcopy__(self, memodict={}):
-        return programstate(self.variables, self.methods,self.errors, self.stepCount)
+        return programstate(self.variables, self.methods, self.errors, self.stepCount)
 
 operatorDict = {
     '-': min_command,
@@ -69,7 +69,7 @@ def executeDebugStep(f):
         return f(p, progstate)
     return inner
 
-def executeStep(curNode: Node, progState: programstate)-> Union[programstate, int]:
+def executeStep(curNode: Node, progState: programstate)-> Union[programstate, int, List[str]]:
     """
     Execute current Node step
     :param curNode: the current Node that needs to be executed
@@ -77,7 +77,6 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
     :return: either programstate if done, or an int if a calculation was made
     """
     progStateCopy = copy.deepcopy(progState)
-    # print(curNode)
     if curNode.right is None and curNode.left is None:
         return progStateCopy
     if curNode.data == 'while':
@@ -89,7 +88,6 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
         else:
             return progStateCopy
     if curNode.data == 'if':
-        print(curNode)
         condition = curNode.left if curNode.left not in progStateCopy.variables else progStateCopy.variables[curNode.left]
         lhs = curNode.center
         rhs = curNode.right
@@ -98,23 +96,49 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
         elif rhs is not None:
             progStateCopy = functools.reduce(lambda x,y: executeStep(y, x), rhs, progStateCopy)
         return progStateCopy
+    if curNode.data == 'ASSIGNMETHODDARGUMENT':
+        varlist = [curNode.right]
+        varlist += executeStep(curNode.left, progStateCopy)
+        return varlist
+
+    if curNode.data == 'method':
+        return [curNode.left]
+
     lhs = curNode.left if curNode.left not in progStateCopy.variables else progStateCopy.variables[curNode.left]
     rhs = curNode.right if curNode.right not in progStateCopy.variables else progStateCopy.variables[curNode.right]
     if curNode.data in operatorDict:
-        if type(rhs) == Node and type (lhs) == Node:
+        if type(rhs) == Node and type(lhs) == Node:
             return operatorDict[curNode.data](executeStep(lhs,progStateCopy), executeStep(rhs, progStateCopy))
         elif type(rhs) == Node:
             return operatorDict[curNode.data](int(lhs), executeStep(rhs, progStateCopy))
         elif type(lhs) == Node:
             return operatorDict[curNode.data](executeStep(lhs, progStateCopy), int(rhs))
         return operatorDict[curNode.data](int(lhs), int(rhs))
+
     if curNode.data == '=':
         if type(rhs) == Node:
-            progStateCopy.variables[curNode.left] = executeStep(rhs, progStateCopy)
+            step = executeStep(rhs, progStateCopy)
+            if type(step) == list:
+                method = step[-1]
+                curmethodvars = step[:-1]
+                if method in progStateCopy.methods:
+                    callableMethod = progStateCopy.methods[method]
+                    newProgstate = programstate()
+                    newProgstate.variables = dict(zip(callableMethod.varList, reversed(curmethodvars)))
+                    for p in callableMethod.tree:
+                        newProgstate = executeStep(p,newProgstate)
+                    progStateCopy.variables[curNode.left] = newProgstate
+                    return progStateCopy
+                else:
+                    progStateCopy.errors.append(er.RuntimeError('Call to undefined method: {}'.format(method)))
+                    return progStateCopy
+            progStateCopy.variables[curNode.left] = step
             return progStateCopy
         if rhs is not None:
             progStateCopy.variables[curNode.left] = rhs
             return progStateCopy
+    if curNode.data == 'RETURN':
+        return progStateCopy.variables[curNode.left]
     if curNode.data == 'PRINT':
         print(lhs)  # JASPER FOR THE LOVE OF GOD DEZE PRINT NIET VERWIJDEREN!!!!!!!!!
         return progStateCopy
@@ -128,24 +152,23 @@ def run(filename:str)->None:
     :return: None
     """
     output = lexer.lex(filename)
-    print(output)
+    # print(output)
     if len(output[1]) > 0:
             print(output[1])
     else:
         parseState = prs.ParseState()
         pList = prs.parse(output[0], parseState)
-        print(pList)
         if len(pList.errorList) > 0:
             print(pList.errorList)
         else:
             progstate = programstate()
+            progstate.methods = pList.methodDict
+
             if 'main' in pList.methodDict:
                 for p in pList.methodDict['main'].tree:
                     if len(progstate.errors) > 0:
                         print(progstate.errors)
-                        exit()
                     else:
-                        print(p)
                         progstate = executeStep(p, progstate)
             else:
                 print(er.RuntimeError("No Main method found"))

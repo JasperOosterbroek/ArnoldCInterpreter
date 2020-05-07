@@ -4,8 +4,6 @@ import errorClass as ec
 from typing import List, Sequence, TypeVar, Union, Tuple, Dict, IO
 
 T = TypeVar('T')
-
-
 def listNoneCheck(checkList: List[T], count: int = 0)-> Union[T, None]:
     """
     Returns the first instance of an item in the list that is not None or None if every item in the list is None

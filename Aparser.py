@@ -20,10 +20,11 @@ class Method:
 
 class ParseState:
 
-    def __init__(self, curPosTokenList = None, varList=None, methodDict=None, errorList=None, treeList=None):
+    def __init__(self, curPosTokenList = None, varList=None, methodDict=None, errorList=None, treeList=None ,assignableVar=None):
         self.curPosTokenList = curPosTokenList if curPosTokenList else 0
         self.varList = varList if varList else list()
         self.methodDict = methodDict if methodDict else dict()
+        self.assignableVar = assignableVar if assignableVar else list()
         self.errorList = errorList if errorList else list()
         self.treeList = treeList if treeList else list()
     def __repr__(self):
@@ -33,7 +34,7 @@ class ParseState:
         return "Parse state: current position:{}, variable list: {}, method list: {}, errorList: {}: treelist: {}".format(self.curPosTokenList, self.varList, self.methodDict, self.errorList, self.treeList)
 
     def __deepcopy__(self, memodict={}):
-        return ParseState(self.curPosTokenList, self.varList, self.methodDict, self.errorList)
+        return ParseState(self.curPosTokenList, self.varList, self.methodDict, self.errorList, self.assignableVar)
 
 RuleDict = {
     'STARTMAIN': [
@@ -128,10 +129,8 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
     if tokenList[pos+count].type == rulelist[count] or tokenList[pos+count].value == rulelist[count]:
         if tokenList[pos+count].type in RuleDict or tokenList[pos+count].value in RuleDict:
             if tokenList[pos+count].value in RuleDict:
-                print(tokenList[pos+count].value)
                 nextList = list(map(lambda x: checkRules(tokenList, x, varlist, pos + count + 1), RuleDict[tokenList[pos+count].value]))
             elif tokenList[pos+count].type in RuleDict:
-                print(tokenList[pos + count].type)
                 nextList = list(map(lambda x: checkRules(tokenList, x, varlist, pos + count + 1), RuleDict[tokenList[pos+count].type]))
             longestInNextList = max(nextList, key=lambda x: len(x[0]))
             if len(longestInNextList[0]) > 0:
@@ -161,7 +160,6 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
 
 
 def createTree(nodeList: List[LToken], count: int = 0, isreversed: bool = False)-> Union[Node,str]:
-    print("create tree",nodeList)
     """
     Creates an AST from the given nodeList, is reversable
     :param nodeList: List of the nodes to build a tree from
@@ -211,7 +209,6 @@ def parse(tokenList, oldState: ParseState):
         return state
     else:
         if tokenList[state.curPosTokenList].type is not "OPERATOR":
-            print("type:", tokenList[state.curPosTokenList].type)
             if tokenList[state.curPosTokenList].type == 'DECLERATION':
                 if tokenList[state.curPosTokenList].value not in state.varList:
                     state.varList.append(tokenList[state.curPosTokenList].value)
@@ -224,7 +221,6 @@ def parse(tokenList, oldState: ParseState):
                 if tokenList[state.curPosTokenList].value in RuleDict:
                     possibleRules = possibleRules + RuleDict[tokenList[state.curPosTokenList].value]
                 if tokenList[state.curPosTokenList].type is "STARTBLOCK" or tokenList[state.curPosTokenList].type is 'STARTMETHOD':
-                    print("startblock: ",tokenList[state.curPosTokenList].type)
                     if tokenList[state.curPosTokenList].value == "STARTWHILE":
                         nodeValue = "while"
                         state.curPosTokenList += 1
@@ -272,7 +268,7 @@ def parse(tokenList, oldState: ParseState):
                         state.curPosTokenList += 1
                         methodDeclarePos = state.curPosTokenList
                         state = parse(tokenList, state)
-                        newMethod = Method(state.varList, methodName, state.treeList)
+                        newMethod = Method(state.varList, methodName, state.treeList, state.assignableVar)
 
                         if methodName in state.methodDict:
                             state.errorList.append(er.ParseError("Method name: {}, already in use on line {}".format(methodName, methodDeclarePos)))
@@ -293,7 +289,9 @@ def parse(tokenList, oldState: ParseState):
                     if len(curparse[0]) is not 0:
                         curparse[0].insert(0, tokenList[state.curPosTokenList -1])
                         if  tokenList[state.curPosTokenList -1].type == "METHODARGUMENT":
-                            state.varList += filter(None, list(map(lambda x: x.value if x.type == "METHODARGUMENT" else None , curparse[0])))
+                            tmpFilteredList = filter(None, list(map(lambda x: x.value if x.type == "METHODARGUMENT" else None , curparse[0])))
+                            state.varList += tmpFilteredList
+                            state.assignableVar += tmpFilteredList
                         state.curPosTokenList += len(curparse[0]) -1
                         nextparse = parse(tokenList, state)
                         state.curPosTokenList = nextparse.curPosTokenList
