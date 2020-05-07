@@ -1,22 +1,24 @@
-import sys
 import interpeter
 import argparse
+import unittest
 import unittests
+import sys
 
-argParser = argparse.ArgumentParser(description="ARNOLDC PARSER")
+argParser = argparse.ArgumentParser(description="ARNOLDC interpreter")
 argParser.add_argument("-f", "--file", required=True, type=str, help="FilePath to interperatable file")
-argParser.add_argument("-d", "--debug", action="store_true", help="Outputs programstate per step to console")
-argParser.add_argument("-t", "--tests", action="store_true", help="Runs tests before parsing file")
-args = argParser.parse_args()
+argParser.add_argument("-d", "--debug", action="store_true", default=False, help="Outputs programstate per step to console")
+argParser.add_argument("-t", "--test", action="store_true", default=False, help="Runs tests before parsing file")
+options = argParser.parse_args()
 
-if args.tests:
-    unittests.unittest.main()
+if options.test:
+    suite = unittest.TestLoader().loadTestsFromModule(unittests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-if args.debug:
+if options.debug:
     interpeter.executeStep = interpeter.executeDebugStep(interpeter.executeStep)
 
 lineList = list()
-with open(args.file) as f:
+with open(options.file) as f:
   for line in f:
     lineList.append(line)
 interpeter.run(lineList)
