@@ -60,6 +60,7 @@ class LToken:
     def __repr__(self) -> str:
         """
         String representation of the class instance, used for debugging
+        Lines has been omitted with reasons against spamming the console, it is however usefull in error messages
         :return: Representable string of the token
         """
         return "Token( Type: {}, Value: {})".format(self.type, self.value)

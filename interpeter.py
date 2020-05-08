@@ -4,7 +4,7 @@ from node import Node
 import copy
 import functools
 import errorClass as er
-from typing import List, Union
+from typing import List, Union, Dict, Callable
 
 def add_command(x:int,y:int)->int:
     return x + y
@@ -35,16 +35,16 @@ def and_compare(x:int, y:int)->int:
 
 class programstate:
 
-    def __init__(self, variables=None, methods=None, error=None, stepCount=0):
+    def __init__(self, variables: Dict[str, int] = None, methods: Dict[str, prs.Method] = None, error:List[er.Error] = None, stepCount: int = 0) -> None:
         self.variables = variables if variables else dict()
         self.methods = methods if methods else dict()
         self.errors = error if error else list()
         self.stepCount = stepCount
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Programstate: \nvariable: {}, methods: {}, stepCount: {}".format(self.variables, self.methods, self.stepCount)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
     def __deepcopy__(self, memodict={}):
@@ -62,7 +62,13 @@ operatorDict = {
     '&&': and_compare
 }
 
-def executeDebugStep(f):
+def executeDebugStep(f: Callable[[Node, programstate], Union[programstate, int, List[str]]]) -> Callable[[Node, programstate], Union[programstate, int, List[str]]]:
+    """
+    Decorator function for execute step, makes debugging easier
+    by printing the current Node and print the current programstate
+    :param f: function
+    :return:
+    """
     def inner(p, progstate):
         print(p)
         print(progstate)
@@ -145,13 +151,13 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
     progStateCopy.errors.append(er.RuntimeError("Unhandleable Node Data {}".format(curNode.data)))
     return progStateCopy
 
-def run(filename:str)->None:
+def run(lines:List[str])->None:
     """
     Lexes, parses and executes a program written in ArnoldC from given filename file
-    :param filename: Name of the file to use
+    :param lines: the lines in the file
     :return: None
     """
-    output = lexer.lex(filename)
+    output = lexer.lex(lines)
     # print(output)
     if len(output[1]) > 0:
             print(output[1])

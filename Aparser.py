@@ -3,34 +3,33 @@ import copy
 from Ltoken import LToken
 from node import Node, IfElseNode
 import errorClass as er
-from typing import List, Union, Tuple, TypeVar
+from typing import List, Union, Tuple, Dict
 
 class Method:
-    def __init__(self, varList=None, methodName=None, tree=None, assignableVariables=None):
+    def __init__(self, varList: List[str]=None, methodName: List[str]=None, tree: List[Node]=None) -> None:
         self.varList = varList if varList else list()
         self.methodName = methodName if methodName else None
         self.tree = tree if tree else list()
-        self.assignableVariables = assignableVariables if assignableVariables else list()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def __str__(self):
-        return "Method {}:, varlist: {}, assignableVariables: {}, tree:{}".format(self.methodName, self.varList, self.assignableVariables, self.tree)
+    def __str__(self) -> str:
+        return "Method {}:, varlist: {}, tree:{}".format(self.methodName, self.varList, self.tree)
 
 class ParseState:
 
-    def __init__(self, curPosTokenList = None, varList=None, methodDict=None, errorList=None, treeList=None ,assignableVar=None):
+    def __init__(self, curPosTokenList:List[LToken] = None, varList:List[str]=None, methodDict:Dict[str, Method]=None, errorList:List[er.Error]=None, treeList:List[Node]=None ,assignableVar:List[str]=None) -> None:
         self.curPosTokenList = curPosTokenList if curPosTokenList else 0
         self.varList = varList if varList else list()
         self.methodDict = methodDict if methodDict else dict()
         self.assignableVar = assignableVar if assignableVar else list()
         self.errorList = errorList if errorList else list()
         self.treeList = treeList if treeList else list()
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Parse state: current position:{}, variable list: {}, method list: {}, errorList: {}: treelist: {}".format(self.curPosTokenList, self.varList, self.methodDict, self.errorList, self.treeList)
 
     def __deepcopy__(self, memodict={}):
@@ -159,7 +158,7 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
     return [], errorList
 
 
-def createTree(nodeList: List[LToken], count: int = 0, isreversed: bool = False)-> Union[Node,str]:
+def createTree(nodeList: List[LToken], count: int = 0, isreversed: bool = False) -> Union[Node,str]:
     """
     Creates an AST from the given nodeList, is reversable
     :param nodeList: List of the nodes to build a tree from
@@ -268,7 +267,7 @@ def parse(tokenList, oldState: ParseState):
                         state.curPosTokenList += 1
                         methodDeclarePos = state.curPosTokenList
                         state = parse(tokenList, state)
-                        newMethod = Method(state.varList, methodName, state.treeList, state.assignableVar)
+                        newMethod = Method(state.varList, methodName, state.treeList)
 
                         if methodName in state.methodDict:
                             state.errorList.append(er.ParseError("Method name: {}, already in use on line {}".format(methodName, methodDeclarePos)))

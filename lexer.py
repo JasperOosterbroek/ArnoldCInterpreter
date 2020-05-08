@@ -31,7 +31,7 @@ def tokenRegex(fileLine: str, regexDict: Tuple[str, str])-> Union[None, str]:
         return None
 
 
-def getTokenType(fileLine: str, tokenDict: Dict[str,List[str]], lineNum: int)-> Union[None, LToken]: #object == Ltoken
+def getTokenType(fileLine: str, tokenDict: Dict[str,List[str]], lineNum: int)-> Union[None, LToken]:
     """
     Returns the type of the token from the current fileLine if any else return None
     :param fileLine: current line of the executed file
@@ -86,7 +86,7 @@ expectedArguments = {
     'RETURN':['variable', 'int']
 }
 
-def readLine(fileList: List[str], line: int = 0)->Tuple[List[LToken], List[str]]:
+def readLine(fileList: List[str], line: int = 0) -> Tuple[List[LToken], List[str]]:
     """
     Reads the current fileLine from a file and determines if it a valid token for the parser.
     If the token should have an argument it will add this as another token to the list
@@ -162,11 +162,10 @@ def readLine(fileList: List[str], line: int = 0)->Tuple[List[LToken], List[str]]
 
 
 
-def lex(filename : str):
+def lex(lines : List[str]):
     """
-    Lexes the file of the given filename
-    :param filename: the name of the file
+    Lexes the lines from the given list of lines
+    :param lines: the lines to lex
     :return: A tuple of list containing the tokens and errors given bij the readLine function
     """
-    # f = open(filename, "r")
-    return readLine(filename)
+    return readLine(lines)

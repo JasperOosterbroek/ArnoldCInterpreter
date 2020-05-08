@@ -2,7 +2,6 @@ import interpeter
 import argparse
 import unittest
 import unittests
-import sys
 
 argParser = argparse.ArgumentParser(description="ARNOLDC interpreter")
 argParser.add_argument("-f", "--file", required=True, type=str, help="FilePath to interperatable file")
@@ -22,6 +21,3 @@ with open(options.file) as f:
   for line in f:
     lineList.append(line)
 interpeter.run(lineList)
-
-
-# een method moet assigned aan een variable worden, het moet argumenten mee krijgen en het moet een return waarden hebben
