@@ -76,6 +76,7 @@ De volgende dingen worden niet ondersteund die de officiele taal wel ondersteund
 Voor de andere method opties had ik geen tijd om te maken
 De ParseError vondt ik niet nodig, om dit wel toe tevoegen is simpel, de parse error class zou aangepast moeten worden (geval van tekst vervangen)
 De ReadInteger was Input wat ik niet wilde ondersteunen.
+
 simple plus som a = (4 + b) * 2
 ```
 IT'S SHOWTIME
