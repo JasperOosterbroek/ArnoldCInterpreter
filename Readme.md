@@ -33,7 +33,7 @@ De logica tests, operator tests en branch tests zijn overgenomen om aan te geven
 De volgende should have's zijn in de opdracht verwerkt
 - Error-messaging (syntax, parser en runtime)
 - advanced language features (while, Macros, if else & methods meer over methods hieronder)
-- instruction-and-show-off-video (_url_hier_)
+- instruction-and-show-off-video (https://youtu.be/YEGhVjXrs-8)
 ## Extras
 Extras buiten de opdracht must en should have's om:
 - Unittests (overgenomen van de ArnoldC bedenker om de interpreter zo correct mogelijk aan de taal te krijgen)
