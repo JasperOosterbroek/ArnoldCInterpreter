@@ -200,7 +200,7 @@ def createTree(nodeList: List[LToken], count: int = 0, isreversed: bool = False)
     operatorNode.left = nodeList[count].value
     return operatorNode
 
-def parse(tokenList, oldState: ParseState):
+def parse(tokenList: List[LToken], oldState: ParseState) -> ParseStateg:
     state = copy.deepcopy(oldState)
     if(state.curPosTokenList == len(tokenList)):
         return state
