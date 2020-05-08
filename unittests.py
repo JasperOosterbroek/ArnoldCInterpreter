@@ -870,33 +870,147 @@ class MethodTest(unittest.TestCase):
         expected_output = "Hello\n"
         self.assert_stdout(StringList, expected_output)
 
-    # def test_plain_method_call(self):
-    #     StringList = [
-    #         "IT'S SHOWTIME\n",
-    #         "DO IT NOW printHello\n",
-    #         "YOU HAVE BEEN TERMINATED\n",
-    #         "LISTEN TO ME VERY CAREFULLY printHello\n",
-    #         "TALK TO THE HAND \"Hello\"\n",
-    #         "HASTA LA VISTA, BABY"
-    #     ]
-    #     expected_output = "Hello\n"
-    #     self.assert_stdout(StringList, expected_output)
+class BranchTest(unittest.TestCase):
 
-    # def test_evaluate_method_arguments(self):
-    #     StringList = [
-    #         "IT'S SHOWTIME\n",
-    #         "HEY CHRISTMAS TREE argument\n",
-    #         "YOU SET US UP 123\n",
-    #         "DO IT NOW printInteger argument\n",
-    #         "YOU HAVE BEEN TERMINATED\n",
-    #         "LISTEN TO ME VERY CAREFULLY printInteger\n",
-    #         "I NEED YOUR CLOTHES YOUR BOOTS AND YOUR MOTORCYCLE value\n",
-    #         "GIVE THESE PEOPLE AIR\n",
-    #         "TALK TO THE HAND value\n",
-    #         "HASTA LA VISTA, BABY"
-    #     ]
-    #     expected_output = "123\n"
-    #     self.assert_stdout(StringList, expected_output)
+    @unittest.mock.patch('sys.stdout', new_callable=io.StringIO)
+    def assert_stdout(self, StringList, expected_output, mock_stdout):
+        interpeter.run(StringList)
+        self.assertEqual(mock_stdout.getvalue(), expected_output)
+
+    def test_simple_if_statement(self):
+        StringList = [
+            "IT'S SHOWTIME\n",
+            "HEY CHRISTMAS TREE vartrue\n",
+            "YOU SET US UP @NO PROBLEMO\n",
+            "BECAUSE I'M GOING TO SAY PLEASE vartrue\n",
+            "TALK TO THE HAND \"this branch should be reached\"\n",
+            "YOU HAVE NO RESPECT FOR LOGIC\n",
+            "YOU HAVE BEEN TERMINATED\n"
+        ]
+        expected_output = "this branch should be reached\n"
+        self.assert_stdout(StringList, expected_output)
+
+    def test_simple_if_statement_2(self):
+        StringList = [
+            "IT'S SHOWTIME\n",
+            "HEY CHRISTMAS TREE vartrue\n",
+            "YOU SET US UP @I LIED\n",
+            "BECAUSE I'M GOING TO SAY PLEASE vartrue\n",
+            "TALK TO THE HAND \"this branch should not be reached\"\n",
+            "YOU HAVE NO RESPECT FOR LOGIC\n",
+            "YOU HAVE BEEN TERMINATED\n"
+        ]
+        expected_output = ""
+        self.assert_stdout(StringList, expected_output)
+
+    def test_simple_if_else(self):
+        StringList = [
+            "IT'S SHOWTIME\n",
+            "HEY CHRISTMAS TREE vartrue\n",
+            "YOU SET US UP @NO PROBLEMO\n",
+            "BECAUSE I'M GOING TO SAY PLEASE vartrue\n",
+            "TALK TO THE HAND \"this branch should be reached\"\n",
+            "BULLSHIT\n",
+            "TALK TO THE HAND \"this branch should not be reached\"\n",
+            "YOU HAVE NO RESPECT FOR LOGIC\n",
+            "YOU HAVE BEEN TERMINATED\n"
+        ]
+        expected_output = "this branch should be reached\n"
+        self.assert_stdout(StringList, expected_output)
+
+    def test_simple_if_else_2(self):
+        StringList = [
+            "IT'S SHOWTIME\n",
+            "HEY CHRISTMAS TREE varfalse\n",
+            "YOU SET US UP @I LIED\n",
+            "BECAUSE I'M GOING TO SAY PLEASE varfalse\n",
+            "TALK TO THE HAND \"this branch should not be reached\"\n",
+            "BULLSHIT\n",
+            "TALK TO THE HAND \"this branch should be reached\"\n",
+            "YOU HAVE NO RESPECT FOR LOGIC\n",
+            "YOU HAVE BEEN TERMINATED\n"
+        ]
+        expected_output = "this branch should be reached\n"
+        self.assert_stdout(StringList, expected_output)
+
+    def test_assign_variable_in_if(self):
+        StringList = [
+            "IT'S SHOWTIME\n",
+            "HEY CHRISTMAS TREE var\n",
+            "YOU SET US UP 0\n",
+            "HEY CHRISTMAS TREE vartrue\n",
+            "YOU SET US UP @NO PROBLEMO\n",
+            "BECAUSE I'M GOING TO SAY PLEASE vartrue\n",
+            "GET TO THE CHOPPER var\n",
+            "HERE IS MY INVITATION 3\n",
+            "ENOUGH TALK\n",
+            "YOU HAVE NO RESPECT FOR LOGIC\n",
+            "TALK TO THE HAND var\n",
+            "YOU HAVE BEEN TERMINATED\n"
+        ]
+        expected_output = "3\n"
+        self.assert_stdout(StringList, expected_output)
+
+    def test_stub_while(self):
+        StringList = [
+            "IT'S SHOWTIME\n",
+            "HEY CHRISTMAS TREE varfalse\n",
+            "YOU SET US UP @I LIED\n",
+            "STICK AROUND varfalse\n",
+            "CHILL\n",
+            "YOU HAVE BEEN TERMINATED\n"
+        ]
+        expected_output = ""
+        self.assert_stdout(StringList, expected_output)
+
+    def test_stub_while_2(self):
+        StringList = [
+            "IT'S SHOWTIME\n",
+            "STICK AROUND @I LIED\n",
+            "CHILL\n",
+            "YOU HAVE BEEN TERMINATED\n"
+        ]
+        expected_output = ""
+        self.assert_stdout(StringList, expected_output)
+
+    def test_while_executed_once(self):
+        StringList = [
+            "IT'S SHOWTIME\n",
+            "HEY CHRISTMAS TREE varfalse\n",
+            "YOU SET US UP @NO PROBLEMO\n",
+            "STICK AROUND varfalse\n",
+            "GET TO THE CHOPPER varfalse\n",
+            "HERE IS MY INVITATION @I LIED\n",
+            "ENOUGH TALK\n",
+            "TALK TO THE HAND \"while statement printed once\"\n",
+            "CHILL\n",
+            "YOU HAVE BEEN TERMINATED\n"
+        ]
+        expected_output = "while statement printed once\n"
+        self.assert_stdout(StringList, expected_output)
+
+    def test_while_executed_consquently(self):
+        StringList = [
+            "IT'S SHOWTIME\n",
+            "HEY CHRISTMAS TREE isLessThan10\n",
+            "YOU SET US UP @NO PROBLEMO\n",
+            "HEY CHRISTMAS TREE n\n",
+            "YOU SET US UP 0\n",
+            "STICK AROUND isLessThan10\n",
+            "GET TO THE CHOPPER n\n",
+            "HERE IS MY INVITATION n\n",
+            "GET UP 1\n",
+            "ENOUGH TALK\n",
+            "TALK TO THE HAND n\n",
+            "GET TO THE CHOPPER isLessThan10\n",
+            "HERE IS MY INVITATION 10\n",
+            "LET OFF SOME STEAM BENNET n\n",
+            "ENOUGH TALK\n",
+            "CHILL\n",
+            "YOU HAVE BEEN TERMINATED\n"
+        ]
+        expected_output = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n"
+        self.assert_stdout(StringList, expected_output)
 
 if __name__ == '__main__':
     unittest.main()

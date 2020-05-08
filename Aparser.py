@@ -242,24 +242,24 @@ def parse(tokenList, oldState: ParseState):
                         lhs = createTree(lhsList[0])
                         state.curPosTokenList += 1
                         center = parse(tokenList, state)
-                        state.curPosTokenList = center.curPosTokenList
-                        if tokenList[state.curPosTokenList].value == "ELSE":
-                            state.curPosTokenList += 1
+                        state.curPosTokenList = center.curPosTokenList + 1
+                        if tokenList[state.curPosTokenList - 1].value == "ELSE":
                             rhs = parse(tokenList, state)
                             state.curPosTokenList = rhs.curPosTokenList + 1
                             node = IfElseNode(nodeValue, lhs, center.treeList, rhs.treeList)
                         else:
                             node = IfElseNode(nodeValue, lhs, center.treeList)
 
-                        nextParse = parse(tokenList, state)
                         state.treeList.append(node)
+
+                        nextParse = parse(tokenList, state)
+                        state.curPosTokenList = nextParse.curPosTokenList
                         state.treeList += nextParse.treeList
                         state.errorList += nextParse.errorList
                         state.varList += nextParse.varList
                         return state
 
-                    else:
-
+                    elif tokenList[state.curPosTokenList].value == "STARTMAIN" or tokenList[state.curPosTokenList].type == "STARTMETHOD":
                         if tokenList[state.curPosTokenList].value == "STARTMAIN":
                             methodName = "main"
                         if tokenList[state.curPosTokenList].type == "STARTMETHOD":
