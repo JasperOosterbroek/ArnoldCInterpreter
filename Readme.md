@@ -76,4 +76,95 @@ De volgende dingen worden niet ondersteund die de officiele taal wel ondersteund
 Voor de andere method opties had ik geen tijd om te maken
 De ParseError vondt ik niet nodig, om dit wel toe tevoegen is simpel, de parse error class zou aangepast moeten worden (geval van tekst vervangen)
 De ReadInteger was Input wat ik niet wilde ondersteunen.
+simple plus som a = (4 + b) * 2
+```
+IT'S SHOWTIME
+HEY CHRISTMAS TREE a 
+YOU SET US UP 0
+HEY CHRISTMAS TREE b
+YOU SET US UP 20
+GET TO THE CHOPPER a
+HERE IS MY INVITATION 4
+GET UP b
+YOU'RE FIRED 2
+ENOUGH TALK
+YOU HAVE BEEN TERMINATED
+```
+Een voorbeeld met een modulo method
+```
+IT'S SHOWTIME
+HEY CHRISTMAS TREE result1
+YOU SET US UP 0
+HEY CHRISTMAS TREE result2
+YOU SET US UP 0
+HEY CHRISTMAS TREE result3
+YOU SET US UP 0
+HEY CHRISTMAS TREE result4
+YOU SET US UP 0
+GET YOUR ASS TO MARS result1
+DO IT NOW modulo 9 4
+TALK TO THE HAND result1
+GET YOUR ASS TO MARS result2
+DO IT NOW modulo 4795 87
+TALK TO THE HAND result2
+GET YOUR ASS TO MARS result3
+DO IT NOW modulo 3978 221
+TALK TO THE HAND result3
+GET YOUR ASS TO MARS result4
+DO IT NOW modulo 5559 345
+TALK TO THE HAND result4
+YOU HAVE BEEN TERMINATED
 
+LISTEN TO ME VERY CAREFULLY modulo
+I NEED YOUR CLOTHES YOUR BOOTS AND YOUR MOTORCYCLE dividend
+I NEED YOUR CLOTHES YOUR BOOTS AND YOUR MOTORCYCLE divisor
+GIVE THESE PEOPLE AIR
+HEY CHRISTMAS TREE quotient
+YOU SET US UP 0
+HEY CHRISTMAS TREE remainder
+YOU SET US UP 0
+HEY CHRISTMAS TREE product
+YOU SET US UP 0
+GET TO THE CHOPPER quotient
+HERE IS MY INVITATION dividend
+HE HAD TO SPLIT divisor
+ENOUGH TALK
+GET TO THE CHOPPER product
+HERE IS MY INVITATION divisor
+YOU'RE FIRED quotient
+ENOUGH TALK
+GET TO THE CHOPPER remainder
+HERE IS MY INVITATION dividend
+GET DOWN product
+ENOUGH TALK
+I'LL BE BACK remainder
+HASTA LA VISTA, BABY
+```
+een while loop die machten van 1 tot 10 print
+```
+IT'S SHOWTIME
+HEY CHRISTMAS TREE limit
+YOU SET US UP 10
+HEY CHRISTMAS TREE index
+YOU SET US UP 1
+HEY CHRISTMAS TREE squared
+YOU SET US UP 1
+HEY CHRISTMAS TREE loop
+YOU SET US UP @NO PROBLEMO
+STICK AROUND loop
+GET TO THE CHOPPER squared
+HERE IS MY INVITATION index
+YOU'RE FIRED index
+ENOUGH TALK
+TALK TO THE HAND squared
+GET TO THE CHOPPER loop
+HERE IS MY INVITATION limit
+LET OFF SOME STEAM BENNET index
+ENOUGH TALK
+GET TO THE CHOPPER index
+HERE IS MY INVITATION index
+GET UP 1
+ENOUGH TALK
+CHILL
+YOU HAVE BEEN TERMINATED
+```
