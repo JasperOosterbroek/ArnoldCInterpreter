@@ -146,7 +146,7 @@ def executeStep(curNode: Node, progState: programstate)-> Union[programstate, in
     if curNode.data == 'RETURN':
         return progStateCopy.variables[curNode.left]
     if curNode.data == 'PRINT':
-        print(lhs)  # JASPER FOR THE LOVE OF GOD DEZE PRINT NIET VERWIJDEREN!!!!!!!!!
+        print(lhs)
         return progStateCopy
     progStateCopy.errors.append(er.RuntimeError("Unhandleable Node Data {}".format(curNode.data)))
     return progStateCopy

@@ -136,13 +136,13 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
                 if count is not len(rulelist) - 1:
                     next = checkRules(tokenList, rulelist, varlist, pos + len(longestInNextList[0]), count + 1)
                     if next[0] is None:
-                        errorList.append(er.ParseError("Expected '{}', got '{}' on line {} 125".format(rulelist[count+1],tokenList[pos].value, tokenList[pos].line)))
+                        errorList.append(er.ParseError("Expected '{}', got '{}' on line {}".format(rulelist[count+1],tokenList[pos].value, tokenList[pos].line)))
                         return [], errorList
                     return [tokenList[pos + count]] + longestInNextList[0] + next[0], errorList + longestInNextList[1] + next[1]
                 return [tokenList[pos+count]] + longestInNextList[0], errorList + longestInNextList[1]
             if len(longestInNextList[1]) > 0:
                 return [], longestInNextList[1]
-            errorList.append(er.ParseError("Expected '{}', got '{}' on line {} 131".format(rulelist[count], tokenList[pos+1], tokenList[pos+1].line)))
+            errorList.append(er.ParseError("Expected '{}', got '{}' on line {}".format(rulelist[count], tokenList[pos+1], tokenList[pos+1].line)))
             return [], errorList
         else:
             if count == len(rulelist) - 1:
@@ -150,7 +150,7 @@ def checkRules(tokenList: Tuple[List[LToken], List[er.Error]], rulelist: List[st
             else:
                 next = checkRules(tokenList, rulelist, varlist, pos, count + 1)
                 if len(next[0]) is 0:
-                    errorList.append(er.ParseError("Expected '{}', got '{}' on line {} 139".format(rulelist[count+1], tokenList[pos].value, tokenList[pos].line)))
+                    errorList.append(er.ParseError("Expected '{}', got '{}' on line {}".format(rulelist[count+1], tokenList[pos].value, tokenList[pos].line)))
                     return [], errorList
                 return [tokenList[pos+count]] + next[0], errorList + next[1]
     elif tokenList[pos+count].type in RuleDict or tokenList[pos+count].value in RuleDict:
