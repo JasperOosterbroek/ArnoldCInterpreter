@@ -242,12 +242,14 @@ def parse(tokenList, oldState: ParseState):
                         lhs = createTree(lhsList[0])
                         state.curPosTokenList += 1
                         center = parse(tokenList, state)
-                        state.curPosTokenList = center.curPosTokenList + 1
-                        if tokenList[state.curPosTokenList - 1].value == "ELSE":
+                        state.curPosTokenList = center.curPosTokenList
+                        if tokenList[state.curPosTokenList].value == "ELSE":
+                            state.curPosTokenList += 1
                             rhs = parse(tokenList, state)
                             state.curPosTokenList = rhs.curPosTokenList + 1
                             node = IfElseNode(nodeValue, lhs, center.treeList, rhs.treeList)
                         else:
+                            state.curPosTokenList += 1
                             node = IfElseNode(nodeValue, lhs, center.treeList)
 
                         state.treeList.append(node)
