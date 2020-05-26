@@ -14,7 +14,7 @@ if options.test:
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 if options.debug:
-    interpeter.executeStep = interpeter.executeDebugStep(interpeter.executeStep)
+    print("Debug list:\n{} \nCode execution:".format(interpeter.executeStep.debugList))
 
 lineList = list()
 with open(options.file) as f:

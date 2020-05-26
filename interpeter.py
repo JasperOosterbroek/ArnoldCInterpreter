@@ -70,11 +70,13 @@ def executeDebugStep(f: Callable[[Node, programstate], Union[programstate, int, 
     :return:
     """
     def inner(p, progstate):
-        print(p)
-        print(progstate)
+        inner.debugList.append(p)
+        inner.debugList.append(progstate)
         return f(p, progstate)
+    inner.debugList = list()
     return inner
 
+@executeDebugStep
 def executeStep(curNode: Node, progState: programstate)-> Union[programstate, int, List[str]]:
     """
     Execute current Node step
